@@ -1,0 +1,78 @@
+/*
+ * Copyright (c) 2020, Alex Blewitt, Bandlem Ltd
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+package com.bandlem.jvm.jvmulator;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+public class StackTest {
+	private Stack stack;
+	@BeforeEach
+	void newStack() {
+		stack = new Stack();
+	}
+	@Test
+	void testIncompatiblePop() {
+		final Slot[] slots = new Slot[] {
+				Slot.of(1), Slot.of(2f), Slot.of(3L), Slot.of(4d)
+		};
+		final Executable[] ops = new Executable[] {
+				stack::popInt, stack::popFloat, stack::popLong, stack::popDouble
+		};
+		for (final Slot s : slots) {
+			stack.push(s);
+			final Slot same = stack.pop();
+			assertEquals(s, same);
+		}
+		for (int s = 0; s < 4; s++) {
+			for (int o = 0; o < 4; o++) {
+				stack.push(slots[s]);
+				final Executable op = ops[o];
+				if (s == o) {
+					assertDoesNotThrow(op);
+				} else {
+					assertThrows(ClassCastException.class, op);
+				}
+			}
+		}
+	}
+	@Test
+	void testPeek() {
+		stack.push(Slot.empty());
+		assertEquals(Slot.empty(), stack.peek());
+		assertEquals(Slot.empty(), stack.peek());
+		assertEquals(Slot.empty(), stack.pop());
+	}
+	@Test
+	void testStackPopEmpty() {
+		assertThrows(IndexOutOfBoundsException.class, stack::pop);
+	}
+	@Test
+	void testStackPushDouble() {
+		stack.push(2.0d);
+		assertEquals(2.0d, stack.pop().doubleValue());
+	}
+	@Test
+	void testStackPushFloat() {
+		stack.push(2.0f);
+		assertEquals(2.0f, stack.pop().floatValue());
+	}
+	@Test
+	void testStackPushInt() {
+		stack.push(1);
+		assertEquals(1, stack.pop().intValue());
+	}
+	@Test
+	void testStackPushLong() {
+		stack.push(3L);
+		assertEquals(3L, stack.pop().longValue());
+	}
+}
