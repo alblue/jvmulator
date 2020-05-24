@@ -409,14 +409,6 @@ class JVMTest {
 		});
 	}
 	@Test
-	void testInvalid() {
-		final JVM jvm = new JVM();
-		jvm.setBytecode(new byte[] {
-				(byte) 0xff
-		});
-		assertThrows(IllegalStateException.class, jvm::run);
-	}
-	@Test
 	void testLong() {
 		expect(1L, new byte[] {
 				LCONST_0, LCONST_1, LADD
@@ -456,6 +448,15 @@ class JVMTest {
 	void testMisc() {
 		expect(IllegalArgumentException.class, new byte[] {
 				BREAKPOINT
+		});
+		expect(IllegalArgumentException.class, new byte[] {
+				IMPDEP1
+		});
+		expect(IllegalArgumentException.class, new byte[] {
+				IMPDEP2
+		});
+		expect(IllegalStateException.class, new byte[] {
+				(byte) 0xf0
 		});
 	}
 	@Test
