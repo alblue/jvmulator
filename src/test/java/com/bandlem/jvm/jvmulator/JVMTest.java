@@ -41,6 +41,7 @@ import static com.bandlem.jvm.jvmulator.Opcodes.FMUL;
 import static com.bandlem.jvm.jvmulator.Opcodes.FNEG;
 import static com.bandlem.jvm.jvmulator.Opcodes.FREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.FSUB;
+import static com.bandlem.jvm.jvmulator.Opcodes.GOTO;
 import static com.bandlem.jvm.jvmulator.Opcodes.I2B;
 import static com.bandlem.jvm.jvmulator.Opcodes.I2C;
 import static com.bandlem.jvm.jvmulator.Opcodes.I2D;
@@ -284,6 +285,15 @@ class JVMTest {
 		});
 		expect(1.0F, new byte[] {
 				FCONST_1, FCONST_1, FADD, FCONST_1, FSUB, FNEG
+		});
+	}
+	@Test
+	void testGoto() {
+//		expect(4, new byte[] {
+//				ICONST_1, GOTO, 0x00, 0x07, ICONST_2, GOTO, 0x00, 0x03, ICONST_3, IADD
+//		});
+		expect(5, new byte[] {
+				GOTO, 0x00, 0x08, ICONST_1, ICONST_2, GOTO, 0x00, 0x06, GOTO, (byte) 0xff, (byte) -4, ICONST_3, IADD
 		});
 	}
 	@Test

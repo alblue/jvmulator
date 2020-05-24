@@ -320,6 +320,12 @@ public class JVM {
 			stack.push((int) f1 == f2 ? 0 : f2 > f1 ? -1 : 1);
 			return;
 		}
+		// Branching
+		case Opcodes.GOTO: {
+			final int jump = bytecode[pc++] << 8 | bytecode[pc++] - 3;
+			pc = pc + jump;
+			return;
+		}
 		default:
 			throw new IllegalStateException("Unknown opcode: " + Opcodes.name(opcode) + " [" + opcode + "]");
 		}
