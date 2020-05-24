@@ -197,12 +197,40 @@ class JVMTest {
 	}
 	@Test
 	void testSupportedBytecodes() {
-		for (byte b = 0; b < 17; b++) {
+		// Contains the high water mark of implemented features
+		final int max = 87;
+		for (int b = 0; b < max; b++) {
+			final String name = Opcodes.name((byte) b);
+			// Not defined bytecodes
+			if (name == null)
+				continue;
+			// Not supported yet
+			if (name.contains("load") || name.contains("store") || name.contains("ldc"))
+				continue;
 			final JVM jvm = new JVM();
-			jvm.setBytecode(new byte[] {
-					b, 0x01, 0x02
-			});
-			assertDoesNotThrow(jvm::step, "Bytecode " + b + " not supported");
+			int steps = 2;
+			if (name.startsWith("l")) {
+				jvm.setBytecode(new byte[] {
+						LCONST_1, LCONST_0, (byte) b, 0x01, 0x02
+				});
+			} else if (name.startsWith("d")) {
+				jvm.setBytecode(new byte[] {
+						DCONST_1, DCONST_0, (byte) b, 0x01, 0x02
+				});
+			} else if (name.startsWith("f")) {
+				jvm.setBytecode(new byte[] {
+						FCONST_1, FCONST_0, (byte) b, 0x01, 0x02
+				});
+			} else {
+				steps = 4;
+				jvm.setBytecode(new byte[] {
+						ICONST_4, ICONST_3, ICONST_2, ICONST_1, (byte) b, 0x01, 0x02
+				});
+			}
+			while (steps-- > 0) {
+				jvm.step();
+			}
+			assertDoesNotThrow(jvm::step, "Opcode " + name + " not supported (" + b + ")");
 		}
 	}
 }
