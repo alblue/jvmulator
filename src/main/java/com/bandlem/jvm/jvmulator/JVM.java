@@ -289,6 +289,37 @@ public class JVM {
 		case Opcodes.L2D:
 			stack.push((double) stack.popLong());
 			return;
+		// Comparisons
+		case Opcodes.LCMP: {
+			final long l1 = stack.popLong();
+			final long l2 = stack.popLong();
+			stack.push((int) l1 == l2 ? 0 : l1 > l2 ? 1 : -1);
+			return;
+		}
+		case Opcodes.FCMPL: {
+			final float f1 = stack.popFloat();
+			final float f2 = stack.popFloat();
+			stack.push((int) f1 == f2 ? 0 : f1 > f2 ? 1 : -1);
+			return;
+		}
+		case Opcodes.FCMPG: {
+			final float f1 = stack.popFloat();
+			final float f2 = stack.popFloat();
+			stack.push((int) f1 == f2 ? 0 : f2 > f1 ? -1 : 1);
+			return;
+		}
+		case Opcodes.DCMPL: {
+			final double f1 = stack.popDouble();
+			final double f2 = stack.popDouble();
+			stack.push((int) f1 == f2 ? 0 : f1 > f2 ? 1 : -1);
+			return;
+		}
+		case Opcodes.DCMPG: {
+			final double f1 = stack.popDouble();
+			final double f2 = stack.popDouble();
+			stack.push((int) f1 == f2 ? 0 : f2 > f1 ? -1 : 1);
+			return;
+		}
 		default:
 			throw new IllegalStateException("Unknown opcode: " + Opcodes.name(opcode) + " [" + opcode + "]");
 		}

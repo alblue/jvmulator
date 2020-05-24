@@ -12,6 +12,8 @@ import static com.bandlem.jvm.jvmulator.Opcodes.D2F;
 import static com.bandlem.jvm.jvmulator.Opcodes.D2I;
 import static com.bandlem.jvm.jvmulator.Opcodes.D2L;
 import static com.bandlem.jvm.jvmulator.Opcodes.DADD;
+import static com.bandlem.jvm.jvmulator.Opcodes.DCMPG;
+import static com.bandlem.jvm.jvmulator.Opcodes.DCMPL;
 import static com.bandlem.jvm.jvmulator.Opcodes.DCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.DCONST_1;
 import static com.bandlem.jvm.jvmulator.Opcodes.DDIV;
@@ -29,6 +31,8 @@ import static com.bandlem.jvm.jvmulator.Opcodes.F2D;
 import static com.bandlem.jvm.jvmulator.Opcodes.F2I;
 import static com.bandlem.jvm.jvmulator.Opcodes.F2L;
 import static com.bandlem.jvm.jvmulator.Opcodes.FADD;
+import static com.bandlem.jvm.jvmulator.Opcodes.FCMPG;
+import static com.bandlem.jvm.jvmulator.Opcodes.FCMPL;
 import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_1;
 import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_2;
@@ -67,6 +71,7 @@ import static com.bandlem.jvm.jvmulator.Opcodes.L2F;
 import static com.bandlem.jvm.jvmulator.Opcodes.L2I;
 import static com.bandlem.jvm.jvmulator.Opcodes.LADD;
 import static com.bandlem.jvm.jvmulator.Opcodes.LAND;
+import static com.bandlem.jvm.jvmulator.Opcodes.LCMP;
 import static com.bandlem.jvm.jvmulator.Opcodes.LCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.LCONST_1;
 import static com.bandlem.jvm.jvmulator.Opcodes.LDIV;
@@ -124,6 +129,66 @@ class JVMTest {
 		jvm.step();
 		jvm.step();
 		assertThrows(IllegalStateException.class, jvm::step);
+	}
+	@Test
+	void testComparisons() {
+		expect(0, new byte[] {
+				LCONST_1, LCONST_1, LCMP
+		});
+		expect(1, new byte[] {
+				LCONST_0, LCONST_1, LCMP
+		});
+		expect(-1, new byte[] {
+				LCONST_1, LCONST_0, LCMP
+		});
+		expect(0, new byte[] {
+				FCONST_1, FCONST_1, FCMPL
+		});
+		expect(1, new byte[] {
+				FCONST_0, FCONST_1, FCMPL
+		});
+		expect(-1, new byte[] {
+				FCONST_1, FCONST_0, FCMPL
+		});
+		expect(-1, new byte[] {
+				FCONST_0, FCONST_0, FDIV, FCONST_1, FCMPL
+		});
+		expect(0, new byte[] {
+				DCONST_1, DCONST_1, DCMPL
+		});
+		expect(1, new byte[] {
+				DCONST_0, DCONST_1, DCMPL
+		});
+		expect(-1, new byte[] {
+				DCONST_1, DCONST_0, DCMPL
+		});
+		expect(-1, new byte[] {
+				DCONST_0, DCONST_0, DDIV, DCONST_1, DCMPL
+		});
+		expect(0, new byte[] {
+				FCONST_1, FCONST_1, FCMPG
+		});
+		expect(1, new byte[] {
+				FCONST_0, FCONST_1, FCMPG
+		});
+		expect(-1, new byte[] {
+				FCONST_1, FCONST_0, FCMPG
+		});
+		expect(1, new byte[] {
+				FCONST_0, FCONST_0, FDIV, FCONST_1, FCMPG
+		});
+		expect(0, new byte[] {
+				DCONST_1, DCONST_1, DCMPG
+		});
+		expect(1, new byte[] {
+				DCONST_0, DCONST_1, DCMPG
+		});
+		expect(-1, new byte[] {
+				DCONST_1, DCONST_0, DCMPG
+		});
+		expect(1, new byte[] {
+				DCONST_0, DCONST_0, DDIV, DCONST_1, DCMPG
+		});
 	}
 	@Test
 	void testConstantPush() {
@@ -337,7 +402,7 @@ class JVMTest {
 	@Test
 	void testSupportedBytecodes() {
 		// Contains the high water mark of implemented features
-		final int max = 148;
+		final int max = 153;
 		for (int b = 0; b < max; b++) {
 			final String name = Opcodes.name((byte) b);
 			// Not defined bytecodes
