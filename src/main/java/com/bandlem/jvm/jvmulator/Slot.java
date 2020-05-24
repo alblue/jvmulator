@@ -63,12 +63,6 @@ public abstract class Slot {
 	public float floatValue() {
 		return (float) ((FloatSlot) this).value;
 	}
-	public JVMType getType() {
-		return type;
-	}
-	public Object getValue() {
-		return value;
-	}
 	public int intValue() {
 		return (int) ((IntSlot) this).value;
 	}
