@@ -7,6 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 package com.bandlem.jvm.jvmulator;
+import static com.bandlem.jvm.jvmulator.Opcodes.BIPUSH;
 import static com.bandlem.jvm.jvmulator.Opcodes.DADD;
 import static com.bandlem.jvm.jvmulator.Opcodes.DCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.DCONST_1;
@@ -42,6 +43,8 @@ import static com.bandlem.jvm.jvmulator.Opcodes.LMUL;
 import static com.bandlem.jvm.jvmulator.Opcodes.LREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.LSUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.NOP;
+import static com.bandlem.jvm.jvmulator.Opcodes.SIPUSH;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
@@ -71,6 +74,15 @@ class JVMTest {
 		jvm.setBytecode(code);
 		jvm.run();
 		return jvm;
+	}
+	@Test
+	void testConstantPush() {
+		expect(10, new byte[] {
+				BIPUSH, 0x0a
+		});
+		expect(314, new byte[] {
+				SIPUSH, 0x01, 0x3a
+		});
 	}
 	@Test
 	void testDouble() {
@@ -154,5 +166,15 @@ class JVMTest {
 		expect(-1L, new byte[] {
 				LCONST_1, LCONST_1, LADD, LCONST_1, LSUB
 		});
+	}
+	@Test
+	void testSupportedBytecodes() {
+		for (byte b = 0; b < 17; b++) {
+			final JVM jvm = new JVM();
+			jvm.setBytecode(new byte[] {
+					b, 0x01, 0x02
+			});
+			assertDoesNotThrow(jvm::step, "Bytecode " + b + " not supported");
+		}
 	}
 }
