@@ -225,6 +225,24 @@ public class JVM {
 			stack.push(stack.popLong() >>> shift);
 			return;
 		}
+		case Opcodes.IAND:
+			stack.push(stack.popInt() & stack.popInt());
+			return;
+		case Opcodes.LAND:
+			stack.push(stack.popLong() & stack.popLong());
+			return;
+		case Opcodes.IOR:
+			stack.push(stack.popInt() | stack.popInt());
+			return;
+		case Opcodes.LOR:
+			stack.push(stack.popLong() | stack.popLong());
+			return;
+		case Opcodes.IXOR:
+			stack.push(stack.popInt() ^ stack.popInt());
+			return;
+		case Opcodes.LXOR:
+			stack.push(stack.popLong() ^ stack.popLong());
+			return;
 		default:
 			throw new IllegalStateException("Unknown opcode: " + Opcodes.name(opcode) + " [" + opcode + "]");
 		}

@@ -32,6 +32,7 @@ import static com.bandlem.jvm.jvmulator.Opcodes.FNEG;
 import static com.bandlem.jvm.jvmulator.Opcodes.FREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.FSUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.IADD;
+import static com.bandlem.jvm.jvmulator.Opcodes.IAND;
 import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_1;
 import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_2;
@@ -42,22 +43,27 @@ import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_M1;
 import static com.bandlem.jvm.jvmulator.Opcodes.IDIV;
 import static com.bandlem.jvm.jvmulator.Opcodes.IMUL;
 import static com.bandlem.jvm.jvmulator.Opcodes.INEG;
+import static com.bandlem.jvm.jvmulator.Opcodes.IOR;
 import static com.bandlem.jvm.jvmulator.Opcodes.IREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.ISHL;
 import static com.bandlem.jvm.jvmulator.Opcodes.ISHR;
 import static com.bandlem.jvm.jvmulator.Opcodes.ISUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.IUSHR;
+import static com.bandlem.jvm.jvmulator.Opcodes.IXOR;
 import static com.bandlem.jvm.jvmulator.Opcodes.LADD;
+import static com.bandlem.jvm.jvmulator.Opcodes.LAND;
 import static com.bandlem.jvm.jvmulator.Opcodes.LCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.LCONST_1;
 import static com.bandlem.jvm.jvmulator.Opcodes.LDIV;
 import static com.bandlem.jvm.jvmulator.Opcodes.LMUL;
 import static com.bandlem.jvm.jvmulator.Opcodes.LNEG;
+import static com.bandlem.jvm.jvmulator.Opcodes.LOR;
 import static com.bandlem.jvm.jvmulator.Opcodes.LREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.LSHL;
 import static com.bandlem.jvm.jvmulator.Opcodes.LSHR;
 import static com.bandlem.jvm.jvmulator.Opcodes.LSUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.LUSHR;
+import static com.bandlem.jvm.jvmulator.Opcodes.LXOR;
 import static com.bandlem.jvm.jvmulator.Opcodes.NOP;
 import static com.bandlem.jvm.jvmulator.Opcodes.POP;
 import static com.bandlem.jvm.jvmulator.Opcodes.POP2;
@@ -178,6 +184,15 @@ class JVMTest {
 		expect(-1 >>> 1, new byte[] {
 				ICONST_M1, ICONST_1, IUSHR
 		});
+		expect(0, new byte[] {
+				ICONST_1, ICONST_1, ICONST_1, IADD, IAND
+		});
+		expect(3, new byte[] {
+				ICONST_1, ICONST_1, ICONST_1, IADD, IOR
+		});
+		expect(3, new byte[] {
+				ICONST_1, ICONST_1, ICONST_1, IADD, IXOR
+		});
 	}
 	@Test
 	void testInvalid() {
@@ -212,6 +227,15 @@ class JVMTest {
 		});
 		expect(-1L >>> 1, new byte[] {
 				LCONST_1, LNEG, ICONST_1, LUSHR
+		});
+		expect(0L, new byte[] {
+				LCONST_1, LCONST_1, LCONST_1, LADD, LAND
+		});
+		expect(3L, new byte[] {
+				LCONST_1, LCONST_1, LCONST_1, LADD, LOR
+		});
+		expect(3L, new byte[] {
+				LCONST_1, LCONST_1, LCONST_1, LADD, LXOR
 		});
 	}
 	@Test
@@ -250,7 +274,7 @@ class JVMTest {
 	@Test
 	void testSupportedBytecodes() {
 		// Contains the high water mark of implemented features
-		final int max = 125;
+		final int max = 132;
 		for (int b = 0; b < max; b++) {
 			final String name = Opcodes.name((byte) b);
 			// Not defined bytecodes
