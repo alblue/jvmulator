@@ -26,6 +26,9 @@ public class JVM {
 		case Opcodes.NOP:
 			return;
 		// Constants
+		case Opcodes.ACONST_NULL:
+			stack.push(null);
+			return;
 		case Opcodes.ICONST_0:
 			stack.push(0);
 			return;
@@ -67,6 +70,12 @@ public class JVM {
 			return;
 		case Opcodes.DCONST_1:
 			stack.push(1D);
+			return;
+		case Opcodes.SIPUSH:
+			stack.push(bytecode[pc++] << 8 | bytecode[pc++]);
+			return;
+		case Opcodes.BIPUSH:
+			stack.push(bytecode[pc++]);
 			return;
 		// Addition
 		case Opcodes.IADD:
