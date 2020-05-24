@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 class JVMTest {
-	private void expect(final Class<IllegalStateException> expected, final byte[] code) {
+	private void expect(final Class<? extends Throwable> expected, final byte[] code) {
 		expect(expected, code.length, code);
 	}
-	private void expect(final Class<IllegalStateException> expected, int steps, final byte[] code) {
+	private void expect(final Class<? extends Throwable> expected, int steps, final byte[] code) {
 		final JVM jvm3 = new JVM();
 		jvm3.setBytecode(code);
 		while (--steps > 0) {
@@ -450,6 +450,12 @@ class JVMTest {
 		});
 		expect(3L, new byte[] {
 				LCONST_1, LCONST_1, LCONST_1, LADD, LXOR
+		});
+	}
+	@Test
+	void testMisc() {
+		expect(IllegalArgumentException.class, new byte[] {
+				BREAKPOINT
 		});
 	}
 	@Test

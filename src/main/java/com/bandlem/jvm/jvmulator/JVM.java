@@ -551,6 +551,9 @@ public class JVM {
 			}
 			return;
 		}
+		// Miscllaneous
+		case Opcodes.BREAKPOINT:
+			throw new IllegalArgumentException("breakpoint should not be found here");
 		default:
 			throw new IllegalStateException("Unknown opcode: " + Opcodes.name(opcode) + " [" + opcode + "]");
 		}
