@@ -194,6 +194,37 @@ public class JVM {
 				notWide(stack.pop(), opcode);
 			}
 			return;
+		// Bitwise and shift operations
+		case Opcodes.ISHL: {
+			final int shift = stack.popInt();
+			stack.push(stack.popInt() << shift);
+			return;
+		}
+		case Opcodes.LSHL: {
+			final int shift = stack.popInt();
+			stack.push(stack.popLong() << shift);
+			return;
+		}
+		case Opcodes.ISHR: {
+			final int shift = stack.popInt();
+			stack.push(stack.popInt() >> shift);
+			return;
+		}
+		case Opcodes.LSHR: {
+			final int shift = stack.popInt();
+			stack.push(stack.popLong() >> shift);
+			return;
+		}
+		case Opcodes.IUSHR: {
+			final int shift = stack.popInt();
+			stack.push(stack.popInt() >>> shift);
+			return;
+		}
+		case Opcodes.LUSHR: {
+			final int shift = stack.popInt();
+			stack.push(stack.popLong() >>> shift);
+			return;
+		}
 		default:
 			throw new IllegalStateException("Unknown opcode: " + Opcodes.name(opcode) + " [" + opcode + "]");
 		}

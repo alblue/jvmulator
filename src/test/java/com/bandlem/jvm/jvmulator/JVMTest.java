@@ -43,7 +43,10 @@ import static com.bandlem.jvm.jvmulator.Opcodes.IDIV;
 import static com.bandlem.jvm.jvmulator.Opcodes.IMUL;
 import static com.bandlem.jvm.jvmulator.Opcodes.INEG;
 import static com.bandlem.jvm.jvmulator.Opcodes.IREM;
+import static com.bandlem.jvm.jvmulator.Opcodes.ISHL;
+import static com.bandlem.jvm.jvmulator.Opcodes.ISHR;
 import static com.bandlem.jvm.jvmulator.Opcodes.ISUB;
+import static com.bandlem.jvm.jvmulator.Opcodes.IUSHR;
 import static com.bandlem.jvm.jvmulator.Opcodes.LADD;
 import static com.bandlem.jvm.jvmulator.Opcodes.LCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.LCONST_1;
@@ -51,7 +54,10 @@ import static com.bandlem.jvm.jvmulator.Opcodes.LDIV;
 import static com.bandlem.jvm.jvmulator.Opcodes.LMUL;
 import static com.bandlem.jvm.jvmulator.Opcodes.LNEG;
 import static com.bandlem.jvm.jvmulator.Opcodes.LREM;
+import static com.bandlem.jvm.jvmulator.Opcodes.LSHL;
+import static com.bandlem.jvm.jvmulator.Opcodes.LSHR;
 import static com.bandlem.jvm.jvmulator.Opcodes.LSUB;
+import static com.bandlem.jvm.jvmulator.Opcodes.LUSHR;
 import static com.bandlem.jvm.jvmulator.Opcodes.NOP;
 import static com.bandlem.jvm.jvmulator.Opcodes.POP;
 import static com.bandlem.jvm.jvmulator.Opcodes.POP2;
@@ -163,6 +169,15 @@ class JVMTest {
 		expect(2, new byte[] {
 				ICONST_2, ICONST_5, IDIV
 		});
+		expect(2, new byte[] {
+				ICONST_1, ICONST_1, ISHL
+		});
+		expect(-1, new byte[] {
+				ICONST_M1, ICONST_1, ISHR
+		});
+		expect(-1 >>> 1, new byte[] {
+				ICONST_M1, ICONST_1, IUSHR
+		});
 	}
 	@Test
 	void testInvalid() {
@@ -188,6 +203,15 @@ class JVMTest {
 		});
 		expect(1L, new byte[] {
 				LCONST_1, LCONST_1, LADD, LCONST_1, LSUB, LNEG
+		});
+		expect(2L, new byte[] {
+				LCONST_1, ICONST_1, LSHL
+		});
+		expect(-1L, new byte[] {
+				LCONST_1, LNEG, ICONST_1, LSHR
+		});
+		expect(-1L >>> 1, new byte[] {
+				LCONST_1, LNEG, ICONST_1, LUSHR
 		});
 	}
 	@Test
@@ -226,7 +250,7 @@ class JVMTest {
 	@Test
 	void testSupportedBytecodes() {
 		// Contains the high water mark of implemented features
-		final int max = 120;
+		final int max = 125;
 		for (int b = 0; b < max; b++) {
 			final String name = Opcodes.name((byte) b);
 			// Not defined bytecodes
@@ -237,24 +261,29 @@ class JVMTest {
 				continue;
 			final JVM jvm = new JVM();
 			int steps = 2;
+			byte[] code;
 			if (name.startsWith("l")) {
-				jvm.setBytecode(new byte[] {
+				code = new byte[] {
 						LCONST_1, LCONST_0, (byte) b, 0x01, 0x02
-				});
+				};
 			} else if (name.startsWith("d")) {
-				jvm.setBytecode(new byte[] {
+				code = new byte[] {
 						DCONST_1, DCONST_0, (byte) b, 0x01, 0x02
-				});
+				};
 			} else if (name.startsWith("f")) {
-				jvm.setBytecode(new byte[] {
+				code = new byte[] {
 						FCONST_1, FCONST_0, (byte) b, 0x01, 0x02
-				});
+				};
 			} else {
 				steps = 4;
-				jvm.setBytecode(new byte[] {
+				code = new byte[] {
 						ICONST_4, ICONST_3, ICONST_2, ICONST_1, (byte) b, 0x01, 0x02
-				});
+				};
 			}
+			if (name.endsWith("shr") || name.endsWith("shl")) {
+				code[1] = ICONST_0;
+			}
+			jvm.setBytecode(code);
 			while (steps-- > 0) {
 				jvm.step();
 			}
