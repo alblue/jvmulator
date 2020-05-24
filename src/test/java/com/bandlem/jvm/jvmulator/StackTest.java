@@ -10,6 +10,7 @@ package com.bandlem.jvm.jvmulator;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ public class StackTest {
 	@Test
 	void testBadStack() {
 		stack.push(0);
-		stack.push(Slot.empty());
+		stack.pushSlot(Slot.empty());
 		assertThrows(IllegalStateException.class, stack::peek);
 		assertThrows(IllegalStateException.class, stack::pop);
 	}
@@ -43,13 +44,13 @@ public class StackTest {
 				stack::popInt, stack::popFloat, stack::popLong, stack::popDouble
 		};
 		for (final Slot s : slots) {
-			stack.push(s);
+			stack.pushSlot(s);
 			final Slot same = stack.pop();
 			assertEquals(s, same);
 		}
 		for (int s = 0; s < 4; s++) {
 			for (int o = 0; o < 4; o++) {
-				stack.push(slots[s]);
+				stack.pushSlot(slots[s]);
 				final Executable op = ops[o];
 				if (s == o) {
 					assertDoesNotThrow(op);
@@ -73,6 +74,19 @@ public class StackTest {
 		stack.push(2);
 		assertEquals(2, stack.peek().intValue());
 		assertEquals(2, stack.pop().intValue());
+	}
+	@Test
+	void testPushNull() {
+		stack.push(null);
+		assertNull(stack.pop().referenceValue());
+		assertThrows(IllegalArgumentException.class, () -> stack.pushSlot(null));
+	}
+	@Test
+	void testReference() {
+		stack.push("Hello World");
+		stack.push(null);
+		assertNull(stack.pop().referenceValue());
+		assertEquals("Hello World", stack.pop().referenceValue());
 	}
 	@Test
 	void testStackPopEmpty() {

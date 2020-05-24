@@ -31,21 +31,28 @@ public class Stack {
 		return pop().longValue();
 	}
 	public void push(final double d) {
-		push(Slot.of(d));
+		pushSlot(Slot.of(d));
 	}
 	public void push(final float f) {
-		push(Slot.of(f));
+		pushSlot(Slot.of(f));
 	}
 	public void push(final int i) {
-		push(Slot.of(i));
+		pushSlot(Slot.of(i));
 	}
 	public void push(final long l) {
-		push(Slot.of(l));
+		pushSlot(Slot.of(l));
 	}
-	public void push(final Slot s) {
-		internal.add(s);
-		if (s.isWide()) {
-			internal.add(Slot.empty());
+	public void push(final Object value) {
+		pushSlot(Slot.of(value));
+	}
+	void pushSlot(final Slot s) {
+		if (s == null) {
+			throw new IllegalArgumentException("Cannot push a null slot");
+		} else {
+			internal.add(s);
+			if (s.isWide()) {
+				internal.add(Slot.empty());
+			}
 		}
 	}
 	private Slot top(final IntFunction<Slot> op) {

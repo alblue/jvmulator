@@ -9,6 +9,7 @@
 package com.bandlem.jvm.jvmulator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,9 @@ public class SlotTest {
 	private static final Slot floatSlot = Slot.of(2.0f);
 	private static final Slot intSlot = Slot.of(1);
 	private static final Slot longSlot = Slot.of(3L);
+	static void wrapSlotInSlot() {
+		Slot.of(Slot.of("Hello World"));
+	}
 	@Test
 	void testDoubleSlot() {
 		final Slot slot = doubleSlot;
@@ -62,5 +66,12 @@ public class SlotTest {
 		assertThrows(ClassCastException.class, slot::intValue);
 		assertThrows(ClassCastException.class, slot::floatValue);
 		assertThrows(ClassCastException.class, slot::doubleValue);
+	}
+	@Test
+	void testReferenceSlot() {
+		final Slot slot = Slot.of("Hello World");
+		assertEquals("Hello World", slot.referenceValue());
+		assertNull(Slot.of(null).referenceValue());
+		assertThrows(IllegalStateException.class, SlotTest::wrapSlotInSlot);
 	}
 }
