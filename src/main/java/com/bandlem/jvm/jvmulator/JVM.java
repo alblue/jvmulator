@@ -11,6 +11,12 @@ public class JVM {
 	private byte[] bytecode;
 	private int pc;
 	Stack stack = new Stack();
+	private Slot notWide(final Slot slot, final byte opcode) {
+		if (slot.isWide()) {
+			throw new IllegalStateException("Cannot use wide slot for opcode " + opcode);
+		}
+		return slot;
+	}
 	public void run() {
 		while (pc != bytecode.length) {
 			step();
@@ -20,8 +26,8 @@ public class JVM {
 		bytecode = code;
 	}
 	public void step() {
-		final byte code = bytecode[pc++];
-		switch (code) {
+		final byte opcode = bytecode[pc++];
+		switch (opcode) {
 		case Opcodes.NOP:
 			return;
 		// Constants
@@ -142,17 +148,32 @@ public class JVM {
 			stack.push(stack.popDouble() - stack.popDouble());
 			return;
 		// Stack manipulation
-		case Opcodes.SWAP:
-			final Slot first = stack.pop();
-			final Slot second = stack.pop();
-			if (first.isWide() || second.isWide()) {
-				throw new IllegalStateException("Cannot swap wide slots");
-			}
+		case Opcodes.SWAP: {
+			final Slot first = notWide(stack.pop(), opcode);
+			final Slot second = notWide(stack.pop(), opcode);
 			stack.pushSlot(first);
 			stack.pushSlot(second);
 			return;
+		}
+		case Opcodes.DUP:
+			stack.pushSlot(notWide(stack.peek(), opcode));
+			return;
+		case Opcodes.DUP2: {
+			final Slot first = stack.pop();
+			if (first.isWide()) {
+				stack.pushSlot(first);
+				stack.pushSlot(first);
+			} else {
+				final Slot second = notWide(stack.pop(), opcode);
+				stack.pushSlot(first);
+				stack.pushSlot(second);
+				stack.pushSlot(first);
+				stack.pushSlot(second);
+			}
+			break;
+		}
 		default:
-			throw new IllegalStateException("Unknown opcode: " + code);
+			throw new IllegalStateException("Unknown opcode: " + Opcodes.name(opcode) + " [" + opcode + "]");
 		}
 	}
 }

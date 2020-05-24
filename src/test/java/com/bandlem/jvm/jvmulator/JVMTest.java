@@ -15,6 +15,8 @@ import static com.bandlem.jvm.jvmulator.Opcodes.DDIV;
 import static com.bandlem.jvm.jvmulator.Opcodes.DMUL;
 import static com.bandlem.jvm.jvmulator.Opcodes.DREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.DSUB;
+import static com.bandlem.jvm.jvmulator.Opcodes.DUP;
+import static com.bandlem.jvm.jvmulator.Opcodes.DUP2;
 import static com.bandlem.jvm.jvmulator.Opcodes.FADD;
 import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_1;
@@ -182,6 +184,15 @@ class JVMTest {
 	void testStackManiupulation() {
 		expect(-1, new byte[] {
 				ICONST_0, ICONST_1, SWAP, ISUB
+		});
+		expect(2, new byte[] {
+				ICONST_1, DUP, IADD
+		});
+		expect(2.0D, new byte[] {
+				DCONST_1, DUP2, DADD
+		});
+		expect(4, new byte[] {
+				ICONST_1, ICONST_1, DUP2, IADD, IADD, IADD
 		});
 	}
 	@Test
