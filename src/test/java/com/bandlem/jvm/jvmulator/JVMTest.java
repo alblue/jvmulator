@@ -13,6 +13,7 @@ import static com.bandlem.jvm.jvmulator.Opcodes.DCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.DCONST_1;
 import static com.bandlem.jvm.jvmulator.Opcodes.DDIV;
 import static com.bandlem.jvm.jvmulator.Opcodes.DMUL;
+import static com.bandlem.jvm.jvmulator.Opcodes.DNEG;
 import static com.bandlem.jvm.jvmulator.Opcodes.DREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.DSUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.DUP;
@@ -27,6 +28,7 @@ import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_1;
 import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_2;
 import static com.bandlem.jvm.jvmulator.Opcodes.FDIV;
 import static com.bandlem.jvm.jvmulator.Opcodes.FMUL;
+import static com.bandlem.jvm.jvmulator.Opcodes.FNEG;
 import static com.bandlem.jvm.jvmulator.Opcodes.FREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.FSUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.IADD;
@@ -39,6 +41,7 @@ import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_5;
 import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_M1;
 import static com.bandlem.jvm.jvmulator.Opcodes.IDIV;
 import static com.bandlem.jvm.jvmulator.Opcodes.IMUL;
+import static com.bandlem.jvm.jvmulator.Opcodes.INEG;
 import static com.bandlem.jvm.jvmulator.Opcodes.IREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.ISUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.LADD;
@@ -46,6 +49,7 @@ import static com.bandlem.jvm.jvmulator.Opcodes.LCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.LCONST_1;
 import static com.bandlem.jvm.jvmulator.Opcodes.LDIV;
 import static com.bandlem.jvm.jvmulator.Opcodes.LMUL;
+import static com.bandlem.jvm.jvmulator.Opcodes.LNEG;
 import static com.bandlem.jvm.jvmulator.Opcodes.LREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.LSUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.NOP;
@@ -120,8 +124,8 @@ class JVMTest {
 		expect(0.0D, new byte[] {
 				DCONST_1, DCONST_1, DADD, DCONST_1, DCONST_1, DADD, DREM
 		});
-		expect(-1.0D, new byte[] {
-				DCONST_1, DCONST_1, DADD, DCONST_1, DSUB
+		expect(1.0D, new byte[] {
+				DCONST_1, DCONST_1, DADD, DCONST_1, DSUB, DNEG
 		});
 	}
 	@Test
@@ -138,14 +142,14 @@ class JVMTest {
 		expect(0.0F, new byte[] {
 				FCONST_1, FCONST_1, FADD, FCONST_1, FCONST_1, FADD, FREM
 		});
-		expect(-1.0F, new byte[] {
-				FCONST_1, FCONST_1, FADD, FCONST_1, FSUB
+		expect(1.0F, new byte[] {
+				FCONST_1, FCONST_1, FADD, FCONST_1, FSUB, FNEG
 		});
 	}
 	@Test
 	void testInteger() {
-		expect(-24, new byte[] {
-				ICONST_4, ICONST_3, ICONST_1, ICONST_0, ICONST_M1, IADD, ISUB, IMUL, IMUL
+		expect(24, new byte[] {
+				ICONST_4, ICONST_3, ICONST_1, ICONST_0, ICONST_M1, IADD, ISUB, IMUL, IMUL, INEG
 		});
 		expect(2, new byte[] {
 				ICONST_5, NOP, ICONST_2, IREM
@@ -182,12 +186,12 @@ class JVMTest {
 		expect(0L, new byte[] {
 				LCONST_1, LCONST_1, LADD, LCONST_1, LCONST_1, LADD, LREM
 		});
-		expect(-1L, new byte[] {
-				LCONST_1, LCONST_1, LADD, LCONST_1, LSUB
+		expect(1L, new byte[] {
+				LCONST_1, LCONST_1, LADD, LCONST_1, LSUB, LNEG
 		});
 	}
 	@Test
-	void testStackManiupulation() {
+	void testStackManipulation() {
 		expect(1, new byte[] {
 				ICONST_1, ICONST_0, POP
 		});
@@ -222,7 +226,7 @@ class JVMTest {
 	@Test
 	void testSupportedBytecodes() {
 		// Contains the high water mark of implemented features
-		final int max = 116;
+		final int max = 120;
 		for (int b = 0; b < max; b++) {
 			final String name = Opcodes.name((byte) b);
 			// Not defined bytecodes

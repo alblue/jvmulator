@@ -147,6 +147,19 @@ public class JVM {
 		case Opcodes.DSUB:
 			stack.push(stack.popDouble() - stack.popDouble());
 			return;
+		// Negation
+		case Opcodes.INEG:
+			stack.push(0 - stack.popInt());
+			return;
+		case Opcodes.FNEG:
+			stack.push(0.0F - stack.popFloat());
+			return;
+		case Opcodes.LNEG:
+			stack.push(0L - stack.popLong());
+			return;
+		case Opcodes.DNEG:
+			stack.push(0.0D - stack.popDouble());
+			return;
 		// Stack manipulation
 		case Opcodes.SWAP: {
 			final Slot first = notWide(stack.pop(), opcode);
