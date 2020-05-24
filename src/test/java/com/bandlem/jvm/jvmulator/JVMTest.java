@@ -17,38 +17,36 @@ class JVMTest {
 		expect(expected, code.length, code);
 	}
 	private void expect(final Class<? extends Throwable> expected, int steps, final byte[] code) {
-		final JVM jvm3 = new JVM();
-		jvm3.setBytecode(code);
+		final JVMFrame frame = new JVMFrame(code);
 		while (--steps > 0) {
-			jvm3.step();
+			frame.step();
 		}
-		assertThrows(expected, jvm3::step);
+		assertThrows(expected, frame::step);
 	}
 	private void expect(final double result, final byte[] code) {
-		final JVM jvm = run(code);
-		assertEquals(result, jvm.stack.pop().doubleValue());
-		assertThrows(IndexOutOfBoundsException.class, jvm.stack::peek);
+		final JVMFrame frame = run(code);
+		assertEquals(result, frame.stack.pop().doubleValue());
+		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	private void expect(final float result, final byte[] code) {
-		final JVM jvm = run(code);
-		assertEquals(result, jvm.stack.pop().floatValue());
-		assertThrows(IndexOutOfBoundsException.class, jvm.stack::peek);
+		final JVMFrame frame = run(code);
+		assertEquals(result, frame.stack.pop().floatValue());
+		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	private void expect(final int result, final byte[] code) {
-		final JVM jvm = run(code);
-		assertEquals(result, jvm.stack.pop().intValue());
-		assertThrows(IndexOutOfBoundsException.class, jvm.stack::peek);
+		final JVMFrame frame = run(code);
+		assertEquals(result, frame.stack.pop().intValue());
+		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	private void expect(final long result, final byte[] code) {
-		final JVM jvm = run(code);
-		assertEquals(result, jvm.stack.pop().longValue());
-		assertThrows(IndexOutOfBoundsException.class, jvm.stack::peek);
+		final JVMFrame frame = run(code);
+		assertEquals(result, frame.stack.pop().longValue());
+		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
-	private JVM run(final byte[] code) {
-		final JVM jvm = new JVM();
-		jvm.setBytecode(code);
-		jvm.run();
-		return jvm;
+	private JVMFrame run(final byte[] code) {
+		final JVMFrame frame = new JVMFrame(code);
+		frame.run();
+		return frame;
 	}
 	@Test
 	void testArray() {
@@ -142,13 +140,12 @@ class JVMTest {
 	}
 	@Test
 	void testBadStackSwap() {
-		final JVM jvm = new JVM();
-		jvm.setBytecode(new byte[] {
+		final JVMFrame frame = new JVMFrame(new byte[] {
 				LCONST_0, DCONST_0, SWAP
 		});
-		jvm.step();
-		jvm.step();
-		assertThrows(IllegalStateException.class, jvm::step);
+		frame.step();
+		frame.step();
+		assertThrows(IllegalStateException.class, frame::step);
 	}
 	@Test
 	void testComparisons() {
@@ -567,7 +564,6 @@ class JVMTest {
 			// Not supported yet
 			if (name.contains("load") || name.contains("store") || name.contains("ldc") || name.contains("iinc"))
 				continue;
-			final JVM jvm = new JVM();
 			int steps = 2;
 			byte[] code;
 			if (name.startsWith("l")) {
@@ -591,11 +587,11 @@ class JVMTest {
 			if (name.endsWith("shr") || name.endsWith("shl")) {
 				code[1] = ICONST_0;
 			}
-			jvm.setBytecode(code);
+			final JVMFrame frame = new JVMFrame(code);
 			while (steps-- > 0) {
-				jvm.step();
+				frame.step();
 			}
-			assertDoesNotThrow(jvm::step, "Opcode " + name + " not supported (" + b + ")");
+			assertDoesNotThrow(frame::step, "Opcode " + name + " not supported (" + b + ")");
 		}
 	}
 }

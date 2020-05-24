@@ -7,23 +7,29 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 package com.bandlem.jvm.jvmulator;
-public class JVM {
-	private byte[] bytecode;
+public class JVMFrame {
+	private final byte[] bytecode;
+	private final Slot[] locals;
 	private int pc;
-	Stack stack = new Stack();
+	final Stack stack = new Stack();
+	public JVMFrame(final byte[] code) {
+		this(code, 0);
+	}
+	public JVMFrame(final byte[] code, final int locals) {
+		this.bytecode = code;
+		this.locals = new Slot[locals];
+	}
 	private Slot notWide(final Slot slot, final byte opcode) {
 		if (slot.isWide()) {
 			throw new IllegalStateException("Cannot use wide slot for opcode " + opcode);
 		}
 		return slot;
 	}
-	public void run() {
+	public Slot run() {
 		while (pc != bytecode.length) {
 			step();
 		}
-	}
-	public void setBytecode(final byte[] code) {
-		bytecode = code;
+		return null;
 	}
 	public void step() {
 		final byte opcode = bytecode[pc++];
