@@ -17,6 +17,10 @@ import static com.bandlem.jvm.jvmulator.Opcodes.DREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.DSUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.DUP;
 import static com.bandlem.jvm.jvmulator.Opcodes.DUP2;
+import static com.bandlem.jvm.jvmulator.Opcodes.DUP2_X1;
+import static com.bandlem.jvm.jvmulator.Opcodes.DUP2_X2;
+import static com.bandlem.jvm.jvmulator.Opcodes.DUP_X1;
+import static com.bandlem.jvm.jvmulator.Opcodes.DUP_X2;
 import static com.bandlem.jvm.jvmulator.Opcodes.FADD;
 import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_1;
@@ -45,6 +49,8 @@ import static com.bandlem.jvm.jvmulator.Opcodes.LMUL;
 import static com.bandlem.jvm.jvmulator.Opcodes.LREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.LSUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.NOP;
+import static com.bandlem.jvm.jvmulator.Opcodes.POP;
+import static com.bandlem.jvm.jvmulator.Opcodes.POP2;
 import static com.bandlem.jvm.jvmulator.Opcodes.SIPUSH;
 import static com.bandlem.jvm.jvmulator.Opcodes.SWAP;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -182,11 +188,23 @@ class JVMTest {
 	}
 	@Test
 	void testStackManiupulation() {
+		expect(1, new byte[] {
+				ICONST_1, ICONST_0, POP
+		});
+		expect(1.0D, new byte[] {
+				DCONST_1, DCONST_0, POP2
+		});
 		expect(-1, new byte[] {
 				ICONST_0, ICONST_1, SWAP, ISUB
 		});
 		expect(2, new byte[] {
 				ICONST_1, DUP, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_1, ICONST_0, DUP_X1, IADD, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_1, ICONST_0, ICONST_0, DUP_X2, IADD, IADD, IADD
 		});
 		expect(2.0D, new byte[] {
 				DCONST_1, DUP2, DADD
@@ -194,11 +212,17 @@ class JVMTest {
 		expect(4, new byte[] {
 				ICONST_1, ICONST_1, DUP2, IADD, IADD, IADD
 		});
+		expect(1.0D, new byte[] {
+				DCONST_1, ICONST_5, DUP2_X1, POP2, POP
+		});
+		expect(2.0D, new byte[] {
+				DCONST_1, DCONST_0, DUP2_X2, DADD, DADD
+		});
 	}
 	@Test
 	void testSupportedBytecodes() {
 		// Contains the high water mark of implemented features
-		final int max = 87;
+		final int max = 116;
 		for (int b = 0; b < max; b++) {
 			final String name = Opcodes.name((byte) b);
 			// Not defined bytecodes

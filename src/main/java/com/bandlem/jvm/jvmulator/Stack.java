@@ -12,6 +12,27 @@ import java.util.List;
 import java.util.function.IntFunction;
 public class Stack {
 	private final List<Slot> internal = new ArrayList<>();
+	public void dup() {
+		internal.add(internal.get(internal.size() - 1));
+	}
+	public void dup_x1() {
+		internal.add(internal.get(internal.size() - 2));
+	}
+	public void dup_x2() {
+		internal.add(internal.get(internal.size() - 3));
+	}
+	public void dup2() {
+		internal.add(internal.get(internal.size() - 2));
+		internal.add(internal.get(internal.size() - 2));
+	}
+	public void dup2_x1() {
+		internal.add(internal.get(internal.size() - 3));
+		internal.add(internal.get(internal.size() - 3));
+	}
+	public void dup2_x2() {
+		internal.add(internal.get(internal.size() - 4));
+		internal.add(internal.get(internal.size() - 4));
+	}
 	public Slot peek() {
 		return top(internal::get);
 	}

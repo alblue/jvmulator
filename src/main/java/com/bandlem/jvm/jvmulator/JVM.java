@@ -156,22 +156,31 @@ public class JVM {
 			return;
 		}
 		case Opcodes.DUP:
-			stack.pushSlot(notWide(stack.peek(), opcode));
+			stack.dup();
 			return;
-		case Opcodes.DUP2: {
-			final Slot first = stack.pop();
-			if (first.isWide()) {
-				stack.pushSlot(first);
-				stack.pushSlot(first);
-			} else {
-				final Slot second = notWide(stack.pop(), opcode);
-				stack.pushSlot(first);
-				stack.pushSlot(second);
-				stack.pushSlot(first);
-				stack.pushSlot(second);
+		case Opcodes.DUP_X1:
+			stack.dup_x1();
+			return;
+		case Opcodes.DUP_X2:
+			stack.dup_x2();
+			return;
+		case Opcodes.DUP2:
+			stack.dup2();
+			return;
+		case Opcodes.DUP2_X1:
+			stack.dup2_x1();
+			return;
+		case Opcodes.DUP2_X2:
+			stack.dup2_x2();
+			return;
+		case Opcodes.POP:
+			notWide(stack.pop(), opcode);
+			return;
+		case Opcodes.POP2:
+			if (!stack.pop().isWide()) {
+				notWide(stack.pop(), opcode);
 			}
-			break;
-		}
+			return;
 		default:
 			throw new IllegalStateException("Unknown opcode: " + Opcodes.name(opcode) + " [" + opcode + "]");
 		}
