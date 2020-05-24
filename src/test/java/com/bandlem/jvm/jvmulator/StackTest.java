@@ -78,15 +78,15 @@ public class StackTest {
 	@Test
 	void testPushNull() {
 		stack.push(null);
-		assertNull(stack.pop().referenceValue());
+		assertNull(stack.popReference());
 		assertThrows(IllegalArgumentException.class, () -> stack.pushSlot(null));
 	}
 	@Test
 	void testReference() {
 		stack.push("Hello World");
 		stack.push(null);
-		assertNull(stack.pop().referenceValue());
-		assertEquals("Hello World", stack.pop().referenceValue());
+		assertNull(stack.popReference());
+		assertEquals("Hello World", stack.popReference());
 	}
 	@Test
 	void testStackPopEmpty() {

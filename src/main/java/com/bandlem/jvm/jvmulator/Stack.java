@@ -51,6 +51,9 @@ public class Stack {
 	public long popLong() {
 		return pop().longValue();
 	}
+	public Object popReference() {
+		return pop().referenceValue();
+	}
 	public void push(final double d) {
 		pushSlot(Slot.of(d));
 	}
