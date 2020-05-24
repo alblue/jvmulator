@@ -243,6 +243,52 @@ public class JVM {
 		case Opcodes.LXOR:
 			stack.push(stack.popLong() ^ stack.popLong());
 			return;
+		// Conversions
+		case Opcodes.I2B:
+			stack.push((byte) stack.popInt());
+			return;
+		case Opcodes.I2C:
+			stack.push((char) stack.popInt());
+			return;
+		case Opcodes.I2S:
+			stack.push((short) stack.popInt());
+			return;
+		case Opcodes.I2L:
+			stack.push((long) stack.popInt());
+			return;
+		case Opcodes.I2F:
+			stack.push((float) stack.popInt());
+			return;
+		case Opcodes.I2D:
+			stack.push((double) stack.popInt());
+			return;
+		case Opcodes.F2I:
+			stack.push((int) stack.popFloat());
+			return;
+		case Opcodes.F2L:
+			stack.push((long) stack.popFloat());
+			return;
+		case Opcodes.F2D:
+			stack.push((double) stack.popFloat());
+			return;
+		case Opcodes.D2I:
+			stack.push((int) stack.popDouble());
+			return;
+		case Opcodes.D2L:
+			stack.push((long) stack.popDouble());
+			return;
+		case Opcodes.D2F:
+			stack.push((float) stack.popDouble());
+			return;
+		case Opcodes.L2I:
+			stack.push((int) stack.popLong());
+			return;
+		case Opcodes.L2F:
+			stack.push((float) stack.popLong());
+			return;
+		case Opcodes.L2D:
+			stack.push((double) stack.popLong());
+			return;
 		default:
 			throw new IllegalStateException("Unknown opcode: " + Opcodes.name(opcode) + " [" + opcode + "]");
 		}

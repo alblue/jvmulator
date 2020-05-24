@@ -8,6 +8,9 @@
  */
 package com.bandlem.jvm.jvmulator;
 import static com.bandlem.jvm.jvmulator.Opcodes.BIPUSH;
+import static com.bandlem.jvm.jvmulator.Opcodes.D2F;
+import static com.bandlem.jvm.jvmulator.Opcodes.D2I;
+import static com.bandlem.jvm.jvmulator.Opcodes.D2L;
 import static com.bandlem.jvm.jvmulator.Opcodes.DADD;
 import static com.bandlem.jvm.jvmulator.Opcodes.DCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.DCONST_1;
@@ -22,6 +25,9 @@ import static com.bandlem.jvm.jvmulator.Opcodes.DUP2_X1;
 import static com.bandlem.jvm.jvmulator.Opcodes.DUP2_X2;
 import static com.bandlem.jvm.jvmulator.Opcodes.DUP_X1;
 import static com.bandlem.jvm.jvmulator.Opcodes.DUP_X2;
+import static com.bandlem.jvm.jvmulator.Opcodes.F2D;
+import static com.bandlem.jvm.jvmulator.Opcodes.F2I;
+import static com.bandlem.jvm.jvmulator.Opcodes.F2L;
 import static com.bandlem.jvm.jvmulator.Opcodes.FADD;
 import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_0;
 import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_1;
@@ -31,6 +37,12 @@ import static com.bandlem.jvm.jvmulator.Opcodes.FMUL;
 import static com.bandlem.jvm.jvmulator.Opcodes.FNEG;
 import static com.bandlem.jvm.jvmulator.Opcodes.FREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.FSUB;
+import static com.bandlem.jvm.jvmulator.Opcodes.I2B;
+import static com.bandlem.jvm.jvmulator.Opcodes.I2C;
+import static com.bandlem.jvm.jvmulator.Opcodes.I2D;
+import static com.bandlem.jvm.jvmulator.Opcodes.I2F;
+import static com.bandlem.jvm.jvmulator.Opcodes.I2L;
+import static com.bandlem.jvm.jvmulator.Opcodes.I2S;
 import static com.bandlem.jvm.jvmulator.Opcodes.IADD;
 import static com.bandlem.jvm.jvmulator.Opcodes.IAND;
 import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_0;
@@ -50,6 +62,9 @@ import static com.bandlem.jvm.jvmulator.Opcodes.ISHR;
 import static com.bandlem.jvm.jvmulator.Opcodes.ISUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.IUSHR;
 import static com.bandlem.jvm.jvmulator.Opcodes.IXOR;
+import static com.bandlem.jvm.jvmulator.Opcodes.L2D;
+import static com.bandlem.jvm.jvmulator.Opcodes.L2F;
+import static com.bandlem.jvm.jvmulator.Opcodes.L2I;
 import static com.bandlem.jvm.jvmulator.Opcodes.LADD;
 import static com.bandlem.jvm.jvmulator.Opcodes.LAND;
 import static com.bandlem.jvm.jvmulator.Opcodes.LCONST_0;
@@ -117,6 +132,54 @@ class JVMTest {
 		});
 		expect(314, new byte[] {
 				SIPUSH, 0x01, 0x3a
+		});
+	}
+	@Test
+	void testConversions() {
+		expect(1L, new byte[] {
+				ICONST_1, I2L
+		});
+		expect(1F, new byte[] {
+				ICONST_1, I2F
+		});
+		expect(1D, new byte[] {
+				ICONST_1, I2D
+		});
+		expect((short) -1, new byte[] {
+				ICONST_M1, I2S
+		});
+		expect((char) -1, new byte[] {
+				ICONST_M1, I2C
+		});
+		expect((byte) -1, new byte[] {
+				ICONST_M1, I2B
+		});
+		expect(1, new byte[] {
+				LCONST_1, L2I
+		});
+		expect(1F, new byte[] {
+				LCONST_1, L2F
+		});
+		expect(1D, new byte[] {
+				LCONST_1, L2D
+		});
+		expect(1, new byte[] {
+				FCONST_1, F2I
+		});
+		expect(1L, new byte[] {
+				FCONST_1, F2L
+		});
+		expect(1D, new byte[] {
+				FCONST_1, F2D
+		});
+		expect(1, new byte[] {
+				DCONST_1, D2I
+		});
+		expect(1L, new byte[] {
+				DCONST_1, D2L
+		});
+		expect(1F, new byte[] {
+				DCONST_1, D2F
 		});
 	}
 	@Test
@@ -274,14 +337,14 @@ class JVMTest {
 	@Test
 	void testSupportedBytecodes() {
 		// Contains the high water mark of implemented features
-		final int max = 132;
+		final int max = 148;
 		for (int b = 0; b < max; b++) {
 			final String name = Opcodes.name((byte) b);
 			// Not defined bytecodes
 			if (name == null)
 				continue;
 			// Not supported yet
-			if (name.contains("load") || name.contains("store") || name.contains("ldc"))
+			if (name.contains("load") || name.contains("store") || name.contains("ldc") || name.contains("iinc"))
 				continue;
 			final JVM jvm = new JVM();
 			int steps = 2;
