@@ -44,6 +44,7 @@ import static com.bandlem.jvm.jvmulator.Opcodes.LREM;
 import static com.bandlem.jvm.jvmulator.Opcodes.LSUB;
 import static com.bandlem.jvm.jvmulator.Opcodes.NOP;
 import static com.bandlem.jvm.jvmulator.Opcodes.SIPUSH;
+import static com.bandlem.jvm.jvmulator.Opcodes.SWAP;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -74,6 +75,16 @@ class JVMTest {
 		jvm.setBytecode(code);
 		jvm.run();
 		return jvm;
+	}
+	@Test
+	void testBadStackSwap() {
+		final JVM jvm = new JVM();
+		jvm.setBytecode(new byte[] {
+				LCONST_0, DCONST_0, SWAP
+		});
+		jvm.step();
+		jvm.step();
+		assertThrows(IllegalStateException.class, jvm::step);
 	}
 	@Test
 	void testConstantPush() {
@@ -165,6 +176,12 @@ class JVMTest {
 		});
 		expect(-1L, new byte[] {
 				LCONST_1, LCONST_1, LADD, LCONST_1, LSUB
+		});
+	}
+	@Test
+	void testStackManiupulation() {
+		expect(-1, new byte[] {
+				ICONST_0, ICONST_1, SWAP, ISUB
 		});
 	}
 	@Test

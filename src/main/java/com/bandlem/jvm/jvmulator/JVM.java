@@ -141,6 +141,16 @@ public class JVM {
 		case Opcodes.DSUB:
 			stack.push(stack.popDouble() - stack.popDouble());
 			return;
+		// Stack manipulation
+		case Opcodes.SWAP:
+			final Slot first = stack.pop();
+			final Slot second = stack.pop();
+			if (first.isWide() || second.isWide()) {
+				throw new IllegalStateException("Cannot swap wide slots");
+			}
+			stack.pushSlot(first);
+			stack.pushSlot(second);
+			return;
 		default:
 			throw new IllegalStateException("Unknown opcode: " + code);
 		}
