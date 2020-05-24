@@ -17,16 +17,10 @@ public enum JVMType {
 	LONG('L', 64), //
 	SHORT('S', 16), //
 	VOID('V', 0);
-	private final char id;
-	private final int size;
+	public final char id;
+	public final int size;
 	private JVMType(final char id, final int size) {
 		this.id = id;
 		this.size = size;
-	}
-	public char getId() {
-		return id;
-	}
-	public int getSize() {
-		return size;
 	}
 }
