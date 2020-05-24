@@ -7,94 +7,23 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 package com.bandlem.jvm.jvmulator;
-import static com.bandlem.jvm.jvmulator.Opcodes.BIPUSH;
-import static com.bandlem.jvm.jvmulator.Opcodes.D2F;
-import static com.bandlem.jvm.jvmulator.Opcodes.D2I;
-import static com.bandlem.jvm.jvmulator.Opcodes.D2L;
-import static com.bandlem.jvm.jvmulator.Opcodes.DADD;
-import static com.bandlem.jvm.jvmulator.Opcodes.DCMPG;
-import static com.bandlem.jvm.jvmulator.Opcodes.DCMPL;
-import static com.bandlem.jvm.jvmulator.Opcodes.DCONST_0;
-import static com.bandlem.jvm.jvmulator.Opcodes.DCONST_1;
-import static com.bandlem.jvm.jvmulator.Opcodes.DDIV;
-import static com.bandlem.jvm.jvmulator.Opcodes.DMUL;
-import static com.bandlem.jvm.jvmulator.Opcodes.DNEG;
-import static com.bandlem.jvm.jvmulator.Opcodes.DREM;
-import static com.bandlem.jvm.jvmulator.Opcodes.DSUB;
-import static com.bandlem.jvm.jvmulator.Opcodes.DUP;
-import static com.bandlem.jvm.jvmulator.Opcodes.DUP2;
-import static com.bandlem.jvm.jvmulator.Opcodes.DUP2_X1;
-import static com.bandlem.jvm.jvmulator.Opcodes.DUP2_X2;
-import static com.bandlem.jvm.jvmulator.Opcodes.DUP_X1;
-import static com.bandlem.jvm.jvmulator.Opcodes.DUP_X2;
-import static com.bandlem.jvm.jvmulator.Opcodes.F2D;
-import static com.bandlem.jvm.jvmulator.Opcodes.F2I;
-import static com.bandlem.jvm.jvmulator.Opcodes.F2L;
-import static com.bandlem.jvm.jvmulator.Opcodes.FADD;
-import static com.bandlem.jvm.jvmulator.Opcodes.FCMPG;
-import static com.bandlem.jvm.jvmulator.Opcodes.FCMPL;
-import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_0;
-import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_1;
-import static com.bandlem.jvm.jvmulator.Opcodes.FCONST_2;
-import static com.bandlem.jvm.jvmulator.Opcodes.FDIV;
-import static com.bandlem.jvm.jvmulator.Opcodes.FMUL;
-import static com.bandlem.jvm.jvmulator.Opcodes.FNEG;
-import static com.bandlem.jvm.jvmulator.Opcodes.FREM;
-import static com.bandlem.jvm.jvmulator.Opcodes.FSUB;
-import static com.bandlem.jvm.jvmulator.Opcodes.GOTO;
-import static com.bandlem.jvm.jvmulator.Opcodes.I2B;
-import static com.bandlem.jvm.jvmulator.Opcodes.I2C;
-import static com.bandlem.jvm.jvmulator.Opcodes.I2D;
-import static com.bandlem.jvm.jvmulator.Opcodes.I2F;
-import static com.bandlem.jvm.jvmulator.Opcodes.I2L;
-import static com.bandlem.jvm.jvmulator.Opcodes.I2S;
-import static com.bandlem.jvm.jvmulator.Opcodes.IADD;
-import static com.bandlem.jvm.jvmulator.Opcodes.IAND;
-import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_0;
-import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_1;
-import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_2;
-import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_3;
-import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_4;
-import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_5;
-import static com.bandlem.jvm.jvmulator.Opcodes.ICONST_M1;
-import static com.bandlem.jvm.jvmulator.Opcodes.IDIV;
-import static com.bandlem.jvm.jvmulator.Opcodes.IMUL;
-import static com.bandlem.jvm.jvmulator.Opcodes.INEG;
-import static com.bandlem.jvm.jvmulator.Opcodes.IOR;
-import static com.bandlem.jvm.jvmulator.Opcodes.IREM;
-import static com.bandlem.jvm.jvmulator.Opcodes.ISHL;
-import static com.bandlem.jvm.jvmulator.Opcodes.ISHR;
-import static com.bandlem.jvm.jvmulator.Opcodes.ISUB;
-import static com.bandlem.jvm.jvmulator.Opcodes.IUSHR;
-import static com.bandlem.jvm.jvmulator.Opcodes.IXOR;
-import static com.bandlem.jvm.jvmulator.Opcodes.L2D;
-import static com.bandlem.jvm.jvmulator.Opcodes.L2F;
-import static com.bandlem.jvm.jvmulator.Opcodes.L2I;
-import static com.bandlem.jvm.jvmulator.Opcodes.LADD;
-import static com.bandlem.jvm.jvmulator.Opcodes.LAND;
-import static com.bandlem.jvm.jvmulator.Opcodes.LCMP;
-import static com.bandlem.jvm.jvmulator.Opcodes.LCONST_0;
-import static com.bandlem.jvm.jvmulator.Opcodes.LCONST_1;
-import static com.bandlem.jvm.jvmulator.Opcodes.LDIV;
-import static com.bandlem.jvm.jvmulator.Opcodes.LMUL;
-import static com.bandlem.jvm.jvmulator.Opcodes.LNEG;
-import static com.bandlem.jvm.jvmulator.Opcodes.LOR;
-import static com.bandlem.jvm.jvmulator.Opcodes.LREM;
-import static com.bandlem.jvm.jvmulator.Opcodes.LSHL;
-import static com.bandlem.jvm.jvmulator.Opcodes.LSHR;
-import static com.bandlem.jvm.jvmulator.Opcodes.LSUB;
-import static com.bandlem.jvm.jvmulator.Opcodes.LUSHR;
-import static com.bandlem.jvm.jvmulator.Opcodes.LXOR;
-import static com.bandlem.jvm.jvmulator.Opcodes.NOP;
-import static com.bandlem.jvm.jvmulator.Opcodes.POP;
-import static com.bandlem.jvm.jvmulator.Opcodes.POP2;
-import static com.bandlem.jvm.jvmulator.Opcodes.SIPUSH;
-import static com.bandlem.jvm.jvmulator.Opcodes.SWAP;
+import static com.bandlem.jvm.jvmulator.Opcodes.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 class JVMTest {
+	private void expect(final Class<IllegalStateException> expected, final byte[] code) {
+		expect(expected, code.length, code);
+	}
+	private void expect(final Class<IllegalStateException> expected, int steps, final byte[] code) {
+		final JVM jvm3 = new JVM();
+		jvm3.setBytecode(code);
+		while (--steps > 0) {
+			jvm3.step();
+		}
+		assertThrows(expected, jvm3::step);
+	}
 	private void expect(final double result, final byte[] code) {
 		final JVM jvm = run(code);
 		assertEquals(result, jvm.stack.pop().doubleValue());
@@ -120,6 +49,55 @@ class JVMTest {
 		jvm.setBytecode(code);
 		jvm.run();
 		return jvm;
+	}
+	@Test
+	void testArray() {
+		for (final byte b : new byte[] {
+				'Z', 'B', 'S', 'C', 'I', 'L', 'F', 'D'
+		}) {
+			expect(2, new byte[] {
+					ICONST_2, NEWARRAY, b, ARRAYLENGTH
+			});
+			if (b == 'L') {
+				expect(1L, new byte[] {
+						ICONST_1, NEWARRAY, b, DUP, ICONST_0, LCONST_1, AASTORE, ICONST_0, AALOAD
+				});
+			} else if (b == 'F') {
+				expect(1F, new byte[] {
+						ICONST_1, NEWARRAY, b, DUP, ICONST_0, FCONST_1, AASTORE, ICONST_0, AALOAD
+				});
+			} else if (b == 'D') {
+				expect(1D, new byte[] {
+						ICONST_1, NEWARRAY, b, DUP, ICONST_0, DCONST_1, AASTORE, ICONST_0, AALOAD
+				});
+			} else if (b == 'Z') {
+				expect(1, new byte[] {
+						ICONST_1, NEWARRAY, b, DUP, ICONST_0, ICONST_1, AASTORE, ICONST_0, AALOAD
+				});
+				expect(0, new byte[] {
+						ICONST_1, NEWARRAY, b, DUP, ICONST_0, ICONST_0, AASTORE, ICONST_0, AALOAD
+				});
+			} else {
+				expect(1, new byte[] {
+						ICONST_1, NEWARRAY, b, DUP, ICONST_0, ICONST_1, AASTORE, ICONST_0, AALOAD
+				});
+			}
+		}
+		expect(IllegalStateException.class, 2, new byte[] {
+				ICONST_0, NEWARRAY, '?'
+		});
+		expect(IllegalStateException.class, new byte[] {
+				ACONST_NULL, ARRAYLENGTH
+		});
+		expect(IllegalStateException.class, new byte[] {
+				ACONST_NULL, ICONST_0, AALOAD
+		});
+		expect(IllegalStateException.class, new byte[] {
+				ACONST_NULL, ICONST_0, ICONST_1, AASTORE
+		});
+		expect(2, new byte[] {
+				ICONST_1, NEWARRAY, 'I', DUP, ICONST_0, ICONST_2, AASTORE, ICONST_0, AALOAD
+		});
 	}
 	@Test
 	void testBadStackSwap() {
@@ -289,11 +267,109 @@ class JVMTest {
 	}
 	@Test
 	void testGoto() {
-//		expect(4, new byte[] {
-//				ICONST_1, GOTO, 0x00, 0x07, ICONST_2, GOTO, 0x00, 0x03, ICONST_3, IADD
-//		});
+		expect(4, new byte[] {
+				ICONST_1, GOTO, 0x00, 0x07, ICONST_2, GOTO, 0x00, 0x03, ICONST_3, IADD
+		});
 		expect(5, new byte[] {
 				GOTO, 0x00, 0x08, ICONST_1, ICONST_2, GOTO, 0x00, 0x06, GOTO, (byte) 0xff, (byte) -4, ICONST_3, IADD
+		});
+	}
+	@Test
+	void testIf() {
+		expect(2, new byte[] {
+				ICONST_0, IFEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_1, IFEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_0, IFNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_1, IFNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_0, IFLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_1, IFLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_0, IFLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_M1, IFLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_M1, IFLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_0, IFGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_M1, IFGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_0, IFGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_1, IFGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_1, IFGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+	}
+	@Test
+	void testIfCmp() {
+		expect(2, new byte[] {
+				ICONST_0, ICONST_0, IF_ICMPEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_0, ICONST_1, IF_ICMPEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_0, ICONST_0, IF_ICMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_1, ICONST_0, IF_ICMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_0, ICONST_0, IF_ICMPLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_0, ICONST_0, IF_ICMPLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_M1, ICONST_0, IF_ICMPLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_1, ICONST_0, IF_ICMPLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_0, ICONST_0, IF_ICMPGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_0, ICONST_0, IF_ICMPGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_1, ICONST_0, IF_ICMPGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_M1, ICONST_0, IF_ICMPGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ACONST_NULL, ACONST_NULL, IF_ACMPEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_0, NEWARRAY, 'Z', ACONST_NULL, IF_ACMPEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2,
+				ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ACONST_NULL, ACONST_NULL, IF_ACMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_0, NEWARRAY, 'Z', ACONST_NULL, IF_ACMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2,
+				ICONST_0, IADD
 		});
 	}
 	@Test

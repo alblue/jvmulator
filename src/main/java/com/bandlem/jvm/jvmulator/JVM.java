@@ -322,8 +322,233 @@ public class JVM {
 		}
 		// Branching
 		case Opcodes.GOTO: {
-			final int jump = bytecode[pc++] << 8 | bytecode[pc++] - 3;
-			pc = pc + jump;
+			pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			return;
+		}
+		case Opcodes.IFEQ: {
+			if (stack.popInt() == 0) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IFNE: {
+			if (stack.popInt() != 0) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IFLT: {
+			if (stack.popInt() < 0) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IFGE: {
+			if (stack.popInt() >= 0) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IFGT: {
+			if (stack.popInt() > 0) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IFLE: {
+			if (stack.popInt() <= 0) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IF_ICMPEQ: {
+			if (stack.popInt() == stack.popInt()) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IF_ICMPNE: {
+			if (stack.popInt() != stack.popInt()) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IF_ICMPLT: {
+			if (stack.popInt() < stack.popInt()) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IF_ICMPGE: {
+			if (stack.popInt() >= stack.popInt()) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IF_ICMPGT: {
+			if (stack.popInt() > stack.popInt()) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IF_ICMPLE: {
+			if (stack.popInt() <= stack.popInt()) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IF_ACMPEQ: {
+			if (stack.popReference() == stack.popReference()) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IF_ACMPNE: {
+			if (stack.popReference() != stack.popReference()) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		// Arrays
+		case Opcodes.NEWARRAY: {
+			final int size = stack.popInt();
+			final char type = (char) bytecode[pc++];
+			Object array;
+			switch (type) {
+			case 'Z':
+				array = new boolean[size];
+				break;
+			case 'B':
+				array = new byte[size];
+				break;
+			case 'C':
+				array = new char[size];
+				break;
+			case 'S':
+				array = new short[size];
+				break;
+			case 'I':
+				array = new int[size];
+				break;
+			case 'L':
+				array = new long[size];
+				break;
+			case 'F':
+				array = new float[size];
+				break;
+			case 'D':
+				array = new double[size];
+				break;
+			default:
+				throw new IllegalStateException("Unknown type: " + type + " for newarray");
+			}
+			stack.push(array);
+			return;
+		}
+		case Opcodes.ARRAYLENGTH: {
+			final Object array = stack.popReference();
+			if (array instanceof boolean[]) {
+				stack.push(((boolean[]) array).length);
+			} else if (array instanceof byte[]) {
+				stack.push(((byte[]) array).length);
+			} else if (array instanceof char[]) {
+				stack.push(((char[]) array).length);
+			} else if (array instanceof short[]) {
+				stack.push(((short[]) array).length);
+			} else if (array instanceof int[]) {
+				stack.push(((int[]) array).length);
+			} else if (array instanceof long[]) {
+				stack.push(((long[]) array).length);
+			} else if (array instanceof float[]) {
+				stack.push(((float[]) array).length);
+			} else if (array instanceof double[]) {
+				stack.push(((double[]) array).length);
+//			} else if (array instanceof Object[]) {
+//				stack.push(((Object[]) array).length);
+			} else {
+				throw new IllegalStateException("Unknown array type: " + array + " for arraylength");
+			}
+			return;
+		}
+		case Opcodes.AASTORE: {
+			final Slot value = stack.pop();
+			final int index = stack.popInt();
+			final Object array = stack.popReference();
+			if (array instanceof boolean[]) {
+				((boolean[]) array)[index] = value.intValue() != 0;
+			} else if (array instanceof byte[]) {
+				((byte[]) array)[index] = (byte) value.intValue();
+			} else if (array instanceof char[]) {
+				((char[]) array)[index] = (char) value.intValue();
+			} else if (array instanceof short[]) {
+				((short[]) array)[index] = (short) value.intValue();
+			} else if (array instanceof int[]) {
+				((int[]) array)[index] = value.intValue();
+			} else if (array instanceof long[]) {
+				((long[]) array)[index] = value.longValue();
+			} else if (array instanceof float[]) {
+				((float[]) array)[index] = value.floatValue();
+			} else if (array instanceof double[]) {
+				((double[]) array)[index] = value.doubleValue();
+//			} else if (array instanceof Object[]) {
+//				stack.push(((Object[]) array).length);
+			} else {
+				throw new IllegalStateException("Unknown array type: " + array + " for aastore");
+			}
+			return;
+		}
+		case Opcodes.AALOAD: {
+			final int index = stack.popInt();
+			final Object array = stack.popReference();
+			if (array instanceof boolean[]) {
+				stack.push(((boolean[]) array)[index] ? 1 : 0);
+			} else if (array instanceof byte[]) {
+				stack.push(((byte[]) array)[index]);
+			} else if (array instanceof char[]) {
+				stack.push(((char[]) array)[index]);
+			} else if (array instanceof short[]) {
+				stack.push(((short[]) array)[index]);
+			} else if (array instanceof int[]) {
+				stack.push(((int[]) array)[index]);
+			} else if (array instanceof long[]) {
+				stack.push(((long[]) array)[index]);
+			} else if (array instanceof float[]) {
+				stack.push(((float[]) array)[index]);
+			} else if (array instanceof double[]) {
+				stack.push(((double[]) array)[index]);
+//			} else if (array instanceof Object[]) {
+//				stack.push(((Object[]) array).length);
+			} else {
+				throw new IllegalStateException("Unknown array type: " + array + " for aaload");
+			}
 			return;
 		}
 		default:
