@@ -10,27 +10,27 @@ package com.bandlem.jvm.jvmulator;
 public abstract class Slot {
 	private static class DoubleSlot extends Slot {
 		public DoubleSlot(final double value) {
-			super(value, JVMType.DOUBLE, true);
+			super(value, true);
 		}
 	}
 	public static class Empty extends Slot {
 		protected Empty() {
-			super(null, JVMType.VOID, false);
+			super(null, false);
 		}
 	}
 	private static class FloatSlot extends Slot {
 		public FloatSlot(final float value) {
-			super(value, JVMType.FLOAT, false);
+			super(value, false);
 		}
 	}
 	private static class IntSlot extends Slot {
 		public IntSlot(final int value) {
-			super(value, JVMType.INTEGER, false);
+			super(value, false);
 		}
 	}
 	private static class LongSlot extends Slot {
 		public LongSlot(final long value) {
-			super(value, JVMType.LONG, true);
+			super(value, true);
 		}
 	}
 	private static final Slot EMPTY = new Empty();
@@ -49,12 +49,10 @@ public abstract class Slot {
 	public static Slot of(final long l) {
 		return new LongSlot(l);
 	}
-	private final JVMType type;
 	protected final Object value;
 	private final boolean wide;
-	protected Slot(final Object value, final JVMType type, final boolean wide) {
+	protected Slot(final Object value, final boolean wide) {
 		this.value = value;
-		this.type = type;
 		this.wide = wide;
 	}
 	public double doubleValue() {
