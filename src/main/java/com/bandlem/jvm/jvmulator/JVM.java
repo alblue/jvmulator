@@ -437,6 +437,22 @@ public class JVM {
 			}
 			return;
 		}
+		case Opcodes.IFNULL: {
+			if (stack.popReference() == null) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
+		case Opcodes.IFNONNULL: {
+			if (stack.popReference() != null) {
+				pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			} else {
+				pc += 2;
+			}
+			return;
+		}
 		// Arrays
 		case Opcodes.NEWARRAY: {
 			final int size = stack.popInt();

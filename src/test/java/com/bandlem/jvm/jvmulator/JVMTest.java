@@ -412,6 +412,18 @@ class JVMTest {
 				ICONST_0, NEWARRAY, 'Z', ACONST_NULL, IF_ACMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2,
 				ICONST_0, IADD
 		});
+		expect(2, new byte[] {
+				ACONST_NULL, IFNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ACONST_NULL, IFNONNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(3, new byte[] {
+				ICONST_0, NEWARRAY, 'Z', IFNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
+		expect(2, new byte[] {
+				ICONST_0, NEWARRAY, 'Z', IFNONNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+		});
 	}
 	@Test
 	void testInteger() {
