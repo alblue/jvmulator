@@ -498,56 +498,70 @@ public class JVM {
 			}
 			return;
 		}
+		case Opcodes.BASTORE:
+		case Opcodes.SASTORE:
+		case Opcodes.CASTORE:
+		case Opcodes.IASTORE:
+		case Opcodes.LASTORE:
+		case Opcodes.FASTORE:
+		case Opcodes.DASTORE:
 		case Opcodes.AASTORE: {
 			final Slot value = stack.pop();
 			final int index = stack.popInt();
 			final Object array = stack.popReference();
-			if (array instanceof boolean[]) {
+			if (array instanceof boolean[] && opcode == Opcodes.BASTORE) {
 				((boolean[]) array)[index] = value.intValue() != 0;
-			} else if (array instanceof byte[]) {
+			} else if (array instanceof byte[] && opcode == Opcodes.BASTORE) {
 				((byte[]) array)[index] = (byte) value.intValue();
-			} else if (array instanceof char[]) {
+			} else if (array instanceof char[] && opcode == Opcodes.CASTORE) {
 				((char[]) array)[index] = (char) value.intValue();
-			} else if (array instanceof short[]) {
+			} else if (array instanceof short[] && opcode == Opcodes.SASTORE) {
 				((short[]) array)[index] = (short) value.intValue();
-			} else if (array instanceof int[]) {
+			} else if (array instanceof int[] && opcode == Opcodes.IASTORE) {
 				((int[]) array)[index] = value.intValue();
-			} else if (array instanceof long[]) {
+			} else if (array instanceof long[] && opcode == Opcodes.LASTORE) {
 				((long[]) array)[index] = value.longValue();
-			} else if (array instanceof float[]) {
+			} else if (array instanceof float[] && opcode == Opcodes.FASTORE) {
 				((float[]) array)[index] = value.floatValue();
-			} else if (array instanceof double[]) {
+			} else if (array instanceof double[] && opcode == Opcodes.DASTORE) {
 				((double[]) array)[index] = value.doubleValue();
 //			} else if (array instanceof Object[]) {
-//				stack.push(((Object[]) array).length);
+//				((Object[]) array)[index] = value.referenceValue();
 			} else {
 				throw new IllegalStateException("Unknown array type: " + array + " for aastore");
 			}
 			return;
 		}
+		case Opcodes.BALOAD:
+		case Opcodes.SALOAD:
+		case Opcodes.CALOAD:
+		case Opcodes.IALOAD:
+		case Opcodes.LALOAD:
+		case Opcodes.FALOAD:
+		case Opcodes.DALOAD:
 		case Opcodes.AALOAD: {
 			final int index = stack.popInt();
 			final Object array = stack.popReference();
-			if (array instanceof boolean[]) {
+			if (array instanceof boolean[] && opcode == Opcodes.BALOAD) {
 				stack.push(((boolean[]) array)[index] ? 1 : 0);
-			} else if (array instanceof byte[]) {
+			} else if (array instanceof byte[] && opcode == Opcodes.BALOAD) {
 				stack.push(((byte[]) array)[index]);
-			} else if (array instanceof char[]) {
+			} else if (array instanceof char[] && opcode == Opcodes.CALOAD) {
 				stack.push(((char[]) array)[index]);
-			} else if (array instanceof short[]) {
+			} else if (array instanceof short[] && opcode == Opcodes.SALOAD) {
 				stack.push(((short[]) array)[index]);
-			} else if (array instanceof int[]) {
+			} else if (array instanceof int[] && opcode == Opcodes.IALOAD) {
 				stack.push(((int[]) array)[index]);
-			} else if (array instanceof long[]) {
+			} else if (array instanceof long[] && opcode == Opcodes.LALOAD) {
 				stack.push(((long[]) array)[index]);
-			} else if (array instanceof float[]) {
+			} else if (array instanceof float[] && opcode == Opcodes.FALOAD) {
 				stack.push(((float[]) array)[index]);
-			} else if (array instanceof double[]) {
+			} else if (array instanceof double[] && opcode == Opcodes.DALOAD) {
 				stack.push(((double[]) array)[index]);
-//			} else if (array instanceof Object[]) {
+//			} else if (array instanceof Object[] && opcode == Opcodes.AALOAD) {
 //				stack.push(((Object[]) array).length);
 			} else {
-				throw new IllegalStateException("Unknown array type: " + array + " for aaload");
+				throw new IllegalStateException("Unknown array type: " + array + " for " + Opcodes.name(opcode));
 			}
 			return;
 		}

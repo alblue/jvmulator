@@ -58,31 +58,34 @@ class JVMTest {
 			expect(2, new byte[] {
 					ICONST_2, NEWARRAY, b, ARRAYLENGTH
 			});
-			if (b == 'L') {
-				expect(1L, new byte[] {
-						ICONST_1, NEWARRAY, b, DUP, ICONST_0, LCONST_1, AASTORE, ICONST_0, AALOAD
-				});
-			} else if (b == 'F') {
-				expect(1F, new byte[] {
-						ICONST_1, NEWARRAY, b, DUP, ICONST_0, FCONST_1, AASTORE, ICONST_0, AALOAD
-				});
-			} else if (b == 'D') {
-				expect(1D, new byte[] {
-						ICONST_1, NEWARRAY, b, DUP, ICONST_0, DCONST_1, AASTORE, ICONST_0, AALOAD
-				});
-			} else if (b == 'Z') {
-				expect(1, new byte[] {
-						ICONST_1, NEWARRAY, b, DUP, ICONST_0, ICONST_1, AASTORE, ICONST_0, AALOAD
-				});
-				expect(0, new byte[] {
-						ICONST_1, NEWARRAY, b, DUP, ICONST_0, ICONST_0, AASTORE, ICONST_0, AALOAD
-				});
-			} else {
-				expect(1, new byte[] {
-						ICONST_1, NEWARRAY, b, DUP, ICONST_0, ICONST_1, AASTORE, ICONST_0, AALOAD
-				});
-			}
 		}
+		expect(1, new byte[] {
+				ICONST_1, NEWARRAY, 'Z', DUP, ICONST_0, ICONST_1, BASTORE, ICONST_0, BALOAD
+		});
+		expect(0, new byte[] {
+				ICONST_1, NEWARRAY, 'Z', DUP, ICONST_0, ICONST_0, BASTORE, ICONST_0, BALOAD
+		});
+		expect(1, new byte[] {
+				ICONST_1, NEWARRAY, 'B', DUP, ICONST_0, ICONST_1, BASTORE, ICONST_0, BALOAD
+		});
+		expect(1, new byte[] {
+				ICONST_1, NEWARRAY, 'S', DUP, ICONST_0, ICONST_1, SASTORE, ICONST_0, SALOAD
+		});
+		expect(1, new byte[] {
+				ICONST_1, NEWARRAY, 'C', DUP, ICONST_0, ICONST_1, CASTORE, ICONST_0, CALOAD
+		});
+		expect(1, new byte[] {
+				ICONST_1, NEWARRAY, 'I', DUP, ICONST_0, ICONST_1, IASTORE, ICONST_0, IALOAD
+		});
+		expect(1L, new byte[] {
+				ICONST_1, NEWARRAY, 'L', DUP, ICONST_0, LCONST_1, LASTORE, ICONST_0, LALOAD
+		});
+		expect(1F, new byte[] {
+				ICONST_1, NEWARRAY, 'F', DUP, ICONST_0, FCONST_1, FASTORE, ICONST_0, FALOAD
+		});
+		expect(1D, new byte[] {
+				ICONST_1, NEWARRAY, 'D', DUP, ICONST_0, DCONST_1, DASTORE, ICONST_0, DALOAD
+		});
 		expect(IllegalStateException.class, 2, new byte[] {
 				ICONST_0, NEWARRAY, '?'
 		});
@@ -96,8 +99,46 @@ class JVMTest {
 				ACONST_NULL, ICONST_0, ICONST_1, AASTORE
 		});
 		expect(2, new byte[] {
-				ICONST_1, NEWARRAY, 'I', DUP, ICONST_0, ICONST_2, AASTORE, ICONST_0, AALOAD
+				ICONST_1, NEWARRAY, 'I', DUP, ICONST_0, ICONST_2, IASTORE, ICONST_0, IALOAD
 		});
+	}
+	@Test
+	void testBadArrayCombinations() {
+		final byte[] types = new byte[] {
+				'Z', 'B', 'S', 'C', 'I', 'L', 'F', 'D'
+		};
+		final byte[] load = new byte[] {
+				BALOAD, BALOAD, SALOAD, CALOAD, IALOAD, LALOAD, FALOAD, DALOAD
+		};
+		final byte[] one = new byte[] {
+				ICONST_1, ICONST_1, ICONST_1, ICONST_1, ICONST_1, LCONST_1, FCONST_1, DCONST_1
+		};
+		final byte[] store = new byte[] {
+				BASTORE, BASTORE, SASTORE, CASTORE, IASTORE, LASTORE, FASTORE, DASTORE
+		};
+		assertEquals(types.length, load.length);
+		assertEquals(types.length, store.length);
+		assertEquals(types.length, one.length);
+		for (int type = 0; type < types.length; type++) {
+			for (int target = 0; target < types.length; target++) {
+				if (store[target] == store[type]) {
+					continue;
+				}
+				expect(IllegalStateException.class, 5, new byte[] {
+						ICONST_1, NEWARRAY, types[type], ICONST_0, one[target], store[target]
+				});
+			}
+		}
+		for (int type = 0; type < types.length; type++) {
+			for (int target = 0; target < types.length; target++) {
+				if (load[target] == load[type]) {
+					continue;
+				}
+				expect(IllegalStateException.class, 4, new byte[] {
+						ICONST_1, NEWARRAY, types[type], ICONST_0, load[target]
+				});
+			}
+		}
 	}
 	@Test
 	void testBadStackSwap() {
