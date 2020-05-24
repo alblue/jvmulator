@@ -33,6 +33,11 @@ public abstract class Slot {
 			super(value, true);
 		}
 	}
+	private static class ReferenceSlot extends Slot {
+		public ReferenceSlot(final Object value) {
+			super(value, false);
+		}
+	}
 	private static final Slot EMPTY = new Empty();
 	public static Slot empty() {
 		return EMPTY;
@@ -48,6 +53,12 @@ public abstract class Slot {
 	}
 	public static Slot of(final long l) {
 		return new LongSlot(l);
+	}
+	public static Slot of(final Object object) {
+		if (object instanceof Slot) {
+			throw new IllegalStateException("Attempted to wrap slot in slot");
+		}
+		return new ReferenceSlot(object);
 	}
 	protected final Object value;
 	private final boolean wide;
@@ -69,5 +80,11 @@ public abstract class Slot {
 	}
 	public long longValue() {
 		return (long) ((LongSlot) this).value;
+	}
+	public Object referenceValue() {
+		// The cast to reference slot ensures this is a reference
+		// The code could be changed to 'return this.value' but then
+		// the code wouldn't correctly check that it is a ReferenceSlot type
+		return ((ReferenceSlot) this).value;
 	}
 }
