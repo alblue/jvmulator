@@ -321,6 +321,10 @@ public class JVM {
 			return;
 		}
 		// Branching
+		case Opcodes.GOTO_W: {
+			pc += bytecode[pc++] << 24 | bytecode[pc++] << 16 | bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			return;
+		}
 		case Opcodes.GOTO: {
 			pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
 			return;

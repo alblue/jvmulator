@@ -311,8 +311,18 @@ class JVMTest {
 		expect(4, new byte[] {
 				ICONST_1, GOTO, 0x00, 0x07, ICONST_2, GOTO, 0x00, 0x03, ICONST_3, IADD
 		});
+		expect(4, new byte[] {
+				ICONST_1, GOTO_W, 0x00, 0x00, 0x00, 0x0b, ICONST_2, GOTO_W, 0x00, 0x00, 0x00, 0x05, ICONST_3, IADD
+		});
 		expect(5, new byte[] {
 				GOTO, 0x00, 0x08, ICONST_1, ICONST_2, GOTO, 0x00, 0x06, GOTO, (byte) 0xff, (byte) -4, ICONST_3, IADD
+		});
+		expect(5, new byte[] {
+				GOTO_W, 0x00, 0x00, 0x00, 0x0c, //
+				ICONST_1, ICONST_2, //
+				GOTO_W, 0x00, 0x00, 0x00, 0x0a, //
+				GOTO_W, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) -6, //
+				ICONST_3, IADD
 		});
 	}
 	@Test
