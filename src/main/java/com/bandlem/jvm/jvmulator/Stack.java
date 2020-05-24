@@ -9,13 +9,14 @@
 package com.bandlem.jvm.jvmulator;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntFunction;
 public class Stack {
 	private final List<Slot> internal = new ArrayList<>();
 	public Slot peek() {
-		return internal.get(internal.size() - 1);
+		return top(internal::get);
 	}
 	public Slot pop() {
-		return internal.remove(internal.size() - 1);
+		return top(internal::remove);
 	}
 	public double popDouble() {
 		return pop().doubleValue();
@@ -43,5 +44,19 @@ public class Stack {
 	}
 	public void push(final Slot s) {
 		internal.add(s);
+		if (s.isWide()) {
+			internal.add(Slot.empty());
+		}
+	}
+	private Slot top(final IntFunction<Slot> op) {
+		final int pos = internal.size() - 1;
+		Slot topslot = op.apply(pos);
+		if (topslot == Slot.empty()) {
+			topslot = op.apply(pos - 1);
+			if (!topslot.isWide()) {
+				throw new IllegalStateException("Top slot was empty, but next was not wide");
+			}
+		}
+		return topslot;
 	}
 }

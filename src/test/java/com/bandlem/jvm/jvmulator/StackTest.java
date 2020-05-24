@@ -9,6 +9,7 @@
 package com.bandlem.jvm.jvmulator;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,20 @@ public class StackTest {
 	@BeforeEach
 	void newStack() {
 		stack = new Stack();
+	}
+	@Test
+	void testBadStack() {
+		stack.push(0);
+		stack.push(Slot.empty());
+		assertThrows(IllegalStateException.class, stack::peek);
+		assertThrows(IllegalStateException.class, stack::pop);
+	}
+	@Test
+	void testDoublePushPeekPop() {
+		stack.push(8.0D);
+		final Slot s = stack.peek();
+		assertFalse(s == Slot.empty());
+		assertEquals(8.0D, s.doubleValue());
 	}
 	@Test
 	void testIncompatiblePop() {
@@ -46,10 +61,18 @@ public class StackTest {
 	}
 	@Test
 	void testPeek() {
-		stack.push(Slot.empty());
-		assertEquals(Slot.empty(), stack.peek());
-		assertEquals(Slot.empty(), stack.peek());
-		assertEquals(Slot.empty(), stack.pop());
+		stack.push(2.0D);
+		assertEquals(2.0D, stack.peek().doubleValue());
+		assertEquals(2.0D, stack.pop().doubleValue());
+		stack.push(2L);
+		assertEquals(2L, stack.peek().longValue());
+		assertEquals(2L, stack.pop().longValue());
+		stack.push(2F);
+		assertEquals(2F, stack.peek().floatValue());
+		assertEquals(2F, stack.pop().floatValue());
+		stack.push(2);
+		assertEquals(2, stack.peek().intValue());
+		assertEquals(2, stack.pop().intValue());
 	}
 	@Test
 	void testStackPopEmpty() {
