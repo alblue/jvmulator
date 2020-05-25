@@ -11,6 +11,8 @@ public class JVMFrame {
 	private final byte[] bytecode;
 	private final Slot[] locals;
 	private int pc;
+	private boolean returning;
+	private Slot returnValue;
 	final Stack stack = new Stack();
 	public JVMFrame(final byte[] code) {
 		this(code, 0);
@@ -26,10 +28,13 @@ public class JVMFrame {
 		return slot;
 	}
 	public Slot run() {
-		while (pc != bytecode.length) {
+		while (!returning) {
 			step();
 		}
-		return null;
+		if (stack.size() != 0) {
+			throw new IllegalStateException("Stack should be empty at return");
+		}
+		return returnValue;
 	}
 	public void step() {
 		final byte opcode = bytecode[pc++];
@@ -463,6 +468,36 @@ public class JVMFrame {
 			}
 			return;
 		}
+		// Returns
+		case Opcodes.DRETURN:
+			returning = true;
+			returnValue = stack.pop();
+			returnValue.doubleValue(); // check return type
+			return;
+		case Opcodes.LRETURN:
+			returning = true;
+			returnValue = stack.pop();
+			returnValue.longValue(); // check return type
+			return;
+		case Opcodes.ARETURN:
+			returning = true;
+			returnValue = stack.pop();
+			returnValue.referenceValue(); // check return type
+			return;
+		case Opcodes.FRETURN:
+			returning = true;
+			returnValue = stack.pop();
+			returnValue.floatValue(); // check return type
+			return;
+		case Opcodes.IRETURN:
+			returning = true;
+			returnValue = stack.pop();
+			returnValue.intValue(); // check return type
+			return;
+		case Opcodes.RETURN:
+			returning = true;
+			returnValue = null;
+			return;
 		// Arrays
 		case Opcodes.NEWARRAY: {
 			final int size = stack.popInt();

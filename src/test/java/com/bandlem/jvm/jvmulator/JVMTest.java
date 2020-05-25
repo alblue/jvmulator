@@ -14,39 +14,36 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 class JVMTest {
 	private void expect(final Class<? extends Throwable> expected, final byte[] code) {
-		expect(expected, code.length, code);
-	}
-	private void expect(final Class<? extends Throwable> expected, int steps, final byte[] code) {
 		final JVMFrame frame = new JVMFrame(code);
-		while (--steps > 0) {
-			frame.step();
-		}
-		assertThrows(expected, frame::step);
+		assertThrows(expected, frame::run);
 	}
 	private void expect(final double result, final byte[] code) {
-		final JVMFrame frame = run(code);
-		assertEquals(result, frame.stack.pop().doubleValue());
+		final JVMFrame frame = new JVMFrame(code);
+		assertEquals(result, frame.run().doubleValue());
 		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	private void expect(final float result, final byte[] code) {
-		final JVMFrame frame = run(code);
-		assertEquals(result, frame.stack.pop().floatValue());
+		final JVMFrame frame = new JVMFrame(code);
+		assertEquals(result, frame.run().floatValue());
 		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	private void expect(final int result, final byte[] code) {
-		final JVMFrame frame = run(code);
-		assertEquals(result, frame.stack.pop().intValue());
+		final JVMFrame frame = new JVMFrame(code);
+		assertEquals(result, frame.run().intValue());
 		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	private void expect(final long result, final byte[] code) {
-		final JVMFrame frame = run(code);
-		assertEquals(result, frame.stack.pop().longValue());
+		final JVMFrame frame = new JVMFrame(code);
+		assertEquals(result, frame.run().longValue());
 		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
-	private JVMFrame run(final byte[] code) {
+	private void expect(final Object result, final byte[] code) {
 		final JVMFrame frame = new JVMFrame(code);
-		frame.run();
-		return frame;
+		final Slot slot = frame.run();
+		if (slot != null) {
+			assertEquals(result, slot.referenceValue());
+		}
+		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	@Test
 	void testArray() {
@@ -54,37 +51,37 @@ class JVMTest {
 				'Z', 'B', 'S', 'C', 'I', 'L', 'F', 'D'
 		}) {
 			expect(2, new byte[] {
-					ICONST_2, NEWARRAY, b, ARRAYLENGTH
+					ICONST_2, NEWARRAY, b, ARRAYLENGTH, IRETURN
 			});
 		}
 		expect(1, new byte[] {
-				ICONST_1, NEWARRAY, 'Z', DUP, ICONST_0, ICONST_1, BASTORE, ICONST_0, BALOAD
+				ICONST_1, NEWARRAY, 'Z', DUP, ICONST_0, ICONST_1, BASTORE, ICONST_0, BALOAD, IRETURN
 		});
 		expect(0, new byte[] {
-				ICONST_1, NEWARRAY, 'Z', DUP, ICONST_0, ICONST_0, BASTORE, ICONST_0, BALOAD
+				ICONST_1, NEWARRAY, 'Z', DUP, ICONST_0, ICONST_0, BASTORE, ICONST_0, BALOAD, IRETURN
 		});
 		expect(1, new byte[] {
-				ICONST_1, NEWARRAY, 'B', DUP, ICONST_0, ICONST_1, BASTORE, ICONST_0, BALOAD
+				ICONST_1, NEWARRAY, 'B', DUP, ICONST_0, ICONST_1, BASTORE, ICONST_0, BALOAD, IRETURN
 		});
 		expect(1, new byte[] {
-				ICONST_1, NEWARRAY, 'S', DUP, ICONST_0, ICONST_1, SASTORE, ICONST_0, SALOAD
+				ICONST_1, NEWARRAY, 'S', DUP, ICONST_0, ICONST_1, SASTORE, ICONST_0, SALOAD, IRETURN
 		});
 		expect(1, new byte[] {
-				ICONST_1, NEWARRAY, 'C', DUP, ICONST_0, ICONST_1, CASTORE, ICONST_0, CALOAD
+				ICONST_1, NEWARRAY, 'C', DUP, ICONST_0, ICONST_1, CASTORE, ICONST_0, CALOAD, IRETURN
 		});
 		expect(1, new byte[] {
-				ICONST_1, NEWARRAY, 'I', DUP, ICONST_0, ICONST_1, IASTORE, ICONST_0, IALOAD
+				ICONST_1, NEWARRAY, 'I', DUP, ICONST_0, ICONST_1, IASTORE, ICONST_0, IALOAD, IRETURN
 		});
 		expect(1L, new byte[] {
-				ICONST_1, NEWARRAY, 'L', DUP, ICONST_0, LCONST_1, LASTORE, ICONST_0, LALOAD
+				ICONST_1, NEWARRAY, 'L', DUP, ICONST_0, LCONST_1, LASTORE, ICONST_0, LALOAD, LRETURN
 		});
 		expect(1F, new byte[] {
-				ICONST_1, NEWARRAY, 'F', DUP, ICONST_0, FCONST_1, FASTORE, ICONST_0, FALOAD
+				ICONST_1, NEWARRAY, 'F', DUP, ICONST_0, FCONST_1, FASTORE, ICONST_0, FALOAD, FRETURN
 		});
 		expect(1D, new byte[] {
-				ICONST_1, NEWARRAY, 'D', DUP, ICONST_0, DCONST_1, DASTORE, ICONST_0, DALOAD
+				ICONST_1, NEWARRAY, 'D', DUP, ICONST_0, DCONST_1, DASTORE, ICONST_0, DALOAD, DRETURN
 		});
-		expect(IllegalStateException.class, 2, new byte[] {
+		expect(IllegalStateException.class, new byte[] {
 				ICONST_0, NEWARRAY, '?'
 		});
 		expect(IllegalStateException.class, new byte[] {
@@ -97,7 +94,7 @@ class JVMTest {
 				ACONST_NULL, ICONST_0, ICONST_1, AASTORE
 		});
 		expect(2, new byte[] {
-				ICONST_1, NEWARRAY, 'I', DUP, ICONST_0, ICONST_2, IASTORE, ICONST_0, IALOAD
+				ICONST_1, NEWARRAY, 'I', DUP, ICONST_0, ICONST_2, IASTORE, ICONST_0, IALOAD, IRETURN
 		});
 	}
 	@Test
@@ -122,8 +119,8 @@ class JVMTest {
 				if (store[target] == store[type]) {
 					continue;
 				}
-				expect(IllegalStateException.class, 5, new byte[] {
-						ICONST_1, NEWARRAY, types[type], ICONST_0, one[target], store[target]
+				expect(IllegalStateException.class, new byte[] {
+						ICONST_1, NEWARRAY, types[type], ICONST_0, one[target], store[target], RETURN
 				});
 			}
 		}
@@ -132,376 +129,405 @@ class JVMTest {
 				if (load[target] == load[type]) {
 					continue;
 				}
-				expect(IllegalStateException.class, 4, new byte[] {
-						ICONST_1, NEWARRAY, types[type], ICONST_0, load[target]
+				expect(IllegalStateException.class, new byte[] {
+						ICONST_1, NEWARRAY, types[type], ICONST_0, load[target], RETURN
 				});
 			}
 		}
 	}
 	@Test
-	void testBadStackSwap() {
-		final JVMFrame frame = new JVMFrame(new byte[] {
-				LCONST_0, DCONST_0, SWAP
+	void testBadReturnStack() {
+		expect(IllegalStateException.class, new byte[] {
+				ICONST_1, RETURN
 		});
-		frame.step();
-		frame.step();
-		assertThrows(IllegalStateException.class, frame::step);
+		expect(IllegalStateException.class, new byte[] {
+				ICONST_1, ICONST_1, IRETURN
+		});
+		expect(IllegalStateException.class, new byte[] {
+				ICONST_1, LCONST_1, LRETURN
+		});
+		expect(IllegalStateException.class, new byte[] {
+				ICONST_1, FCONST_1, FRETURN
+		});
+		expect(IllegalStateException.class, new byte[] {
+				ICONST_1, DCONST_1, DRETURN
+		});
+		expect(IllegalStateException.class, new byte[] {
+				ICONST_1, ACONST_NULL, ARETURN
+		});
+		expect((Object) null, new byte[] {
+				ACONST_NULL, ARETURN, NOP
+		});
+	}
+	@Test
+	void testBadStackSwap() {
+		expect(IllegalStateException.class, new byte[] {
+				LCONST_0, DCONST_0, SWAP, RETURN
+		});
 	}
 	@Test
 	void testComparisons() {
 		expect(0, new byte[] {
-				LCONST_1, LCONST_1, LCMP
+				LCONST_1, LCONST_1, LCMP, IRETURN
 		});
 		expect(1, new byte[] {
-				LCONST_0, LCONST_1, LCMP
+				LCONST_0, LCONST_1, LCMP, IRETURN
 		});
 		expect(-1, new byte[] {
-				LCONST_1, LCONST_0, LCMP
+				LCONST_1, LCONST_0, LCMP, IRETURN
 		});
 		expect(0, new byte[] {
-				FCONST_1, FCONST_1, FCMPL
+				FCONST_1, FCONST_1, FCMPL, IRETURN
 		});
 		expect(1, new byte[] {
-				FCONST_0, FCONST_1, FCMPL
+				FCONST_0, FCONST_1, FCMPL, IRETURN
 		});
 		expect(-1, new byte[] {
-				FCONST_1, FCONST_0, FCMPL
+				FCONST_1, FCONST_0, FCMPL, IRETURN
 		});
 		expect(-1, new byte[] {
-				FCONST_0, FCONST_0, FDIV, FCONST_1, FCMPL
+				FCONST_0, FCONST_0, FDIV, FCONST_1, FCMPL, IRETURN
 		});
 		expect(0, new byte[] {
-				DCONST_1, DCONST_1, DCMPL
+				DCONST_1, DCONST_1, DCMPL, IRETURN
 		});
 		expect(1, new byte[] {
-				DCONST_0, DCONST_1, DCMPL
+				DCONST_0, DCONST_1, DCMPL, IRETURN
 		});
 		expect(-1, new byte[] {
-				DCONST_1, DCONST_0, DCMPL
+				DCONST_1, DCONST_0, DCMPL, IRETURN
 		});
 		expect(-1, new byte[] {
-				DCONST_0, DCONST_0, DDIV, DCONST_1, DCMPL
+				DCONST_0, DCONST_0, DDIV, DCONST_1, DCMPL, IRETURN
 		});
 		expect(0, new byte[] {
-				FCONST_1, FCONST_1, FCMPG
+				FCONST_1, FCONST_1, FCMPG, IRETURN
 		});
 		expect(1, new byte[] {
-				FCONST_0, FCONST_1, FCMPG
+				FCONST_0, FCONST_1, FCMPG, IRETURN
 		});
 		expect(-1, new byte[] {
-				FCONST_1, FCONST_0, FCMPG
+				FCONST_1, FCONST_0, FCMPG, IRETURN
 		});
 		expect(1, new byte[] {
-				FCONST_0, FCONST_0, FDIV, FCONST_1, FCMPG
+				FCONST_0, FCONST_0, FDIV, FCONST_1, FCMPG, IRETURN
 		});
 		expect(0, new byte[] {
-				DCONST_1, DCONST_1, DCMPG
+				DCONST_1, DCONST_1, DCMPG, IRETURN
 		});
 		expect(1, new byte[] {
-				DCONST_0, DCONST_1, DCMPG
+				DCONST_0, DCONST_1, DCMPG, IRETURN
 		});
 		expect(-1, new byte[] {
-				DCONST_1, DCONST_0, DCMPG
+				DCONST_1, DCONST_0, DCMPG, IRETURN
 		});
 		expect(1, new byte[] {
-				DCONST_0, DCONST_0, DDIV, DCONST_1, DCMPG
+				DCONST_0, DCONST_0, DDIV, DCONST_1, DCMPG, IRETURN
 		});
 	}
 	@Test
 	void testConstantPush() {
 		expect(10, new byte[] {
-				BIPUSH, 0x0a
+				BIPUSH, 0x0a, IRETURN
 		});
 		expect(314, new byte[] {
-				SIPUSH, 0x01, 0x3a
+				SIPUSH, 0x01, 0x3a, IRETURN
 		});
 	}
 	@Test
 	void testConversions() {
 		expect(1L, new byte[] {
-				ICONST_1, I2L
+				ICONST_1, I2L, LRETURN
 		});
 		expect(1F, new byte[] {
-				ICONST_1, I2F
+				ICONST_1, I2F, FRETURN
 		});
 		expect(1D, new byte[] {
-				ICONST_1, I2D
+				ICONST_1, I2D, DRETURN
 		});
 		expect((short) -1, new byte[] {
-				ICONST_M1, I2S
+				ICONST_M1, I2S, IRETURN
 		});
 		expect((char) -1, new byte[] {
-				ICONST_M1, I2C
+				ICONST_M1, I2C, IRETURN
 		});
 		expect((byte) -1, new byte[] {
-				ICONST_M1, I2B
+				ICONST_M1, I2B, IRETURN
 		});
 		expect(1, new byte[] {
-				LCONST_1, L2I
+				LCONST_1, L2I, IRETURN
 		});
 		expect(1F, new byte[] {
-				LCONST_1, L2F
+				LCONST_1, L2F, FRETURN
 		});
 		expect(1D, new byte[] {
-				LCONST_1, L2D
+				LCONST_1, L2D, DRETURN
 		});
 		expect(1, new byte[] {
-				FCONST_1, F2I
+				FCONST_1, F2I, IRETURN
 		});
 		expect(1L, new byte[] {
-				FCONST_1, F2L
+				FCONST_1, F2L, LRETURN
 		});
 		expect(1D, new byte[] {
-				FCONST_1, F2D
+				FCONST_1, F2D, DRETURN
 		});
 		expect(1, new byte[] {
-				DCONST_1, D2I
+				DCONST_1, D2I, IRETURN
 		});
 		expect(1L, new byte[] {
-				DCONST_1, D2L
+				DCONST_1, D2L, LRETURN
 		});
 		expect(1F, new byte[] {
-				DCONST_1, D2F
+				DCONST_1, D2F, FRETURN
 		});
 	}
 	@Test
 	void testDouble() {
 		expect(1.0D, new byte[] {
-				DCONST_0, DCONST_1, DADD
+				DCONST_0, DCONST_1, DADD, DRETURN
 		});
 		expect(-1.0D, new byte[] {
-				DCONST_1, DCONST_0, DSUB
+				DCONST_1, DCONST_0, DSUB, DRETURN
 		});
 		expect(4.0D, new byte[] {
-				DCONST_1, DCONST_1, DADD, DCONST_1, DCONST_1, DADD, DMUL
+				DCONST_1, DCONST_1, DADD, DCONST_1, DCONST_1, DADD, DMUL, DRETURN
 		});
 		expect(1.0D, new byte[] {
-				DCONST_1, DCONST_1, DADD, DCONST_1, DCONST_1, DADD, DDIV
+				DCONST_1, DCONST_1, DADD, DCONST_1, DCONST_1, DADD, DDIV, DRETURN
 		});
 		expect(0.0D, new byte[] {
-				DCONST_1, DCONST_1, DADD, DCONST_1, DCONST_1, DADD, DREM
+				DCONST_1, DCONST_1, DADD, DCONST_1, DCONST_1, DADD, DREM, DRETURN
 		});
 		expect(1.0D, new byte[] {
-				DCONST_1, DCONST_1, DADD, DCONST_1, DSUB, DNEG
+				DCONST_1, DCONST_1, DADD, DCONST_1, DSUB, DNEG, DRETURN
 		});
 	}
 	@Test
 	void testFloat() {
 		expect(3.0F, new byte[] {
-				FCONST_0, FCONST_1, FCONST_2, FADD, FADD
+				FCONST_0, FCONST_1, FCONST_2, FADD, FADD, FRETURN
 		});
 		expect(4.0F, new byte[] {
-				FCONST_1, FCONST_1, FADD, FCONST_1, FCONST_1, FADD, FMUL
+				FCONST_1, FCONST_1, FADD, FCONST_1, FCONST_1, FADD, FMUL, FRETURN
 		});
 		expect(1.0F, new byte[] {
-				FCONST_1, FCONST_1, FADD, FCONST_1, FCONST_1, FADD, FDIV
+				FCONST_1, FCONST_1, FADD, FCONST_1, FCONST_1, FADD, FDIV, FRETURN
 		});
 		expect(0.0F, new byte[] {
-				FCONST_1, FCONST_1, FADD, FCONST_1, FCONST_1, FADD, FREM
+				FCONST_1, FCONST_1, FADD, FCONST_1, FCONST_1, FADD, FREM, FRETURN
 		});
 		expect(1.0F, new byte[] {
-				FCONST_1, FCONST_1, FADD, FCONST_1, FSUB, FNEG
+				FCONST_1, FCONST_1, FADD, FCONST_1, FSUB, FNEG, FRETURN
 		});
 	}
 	@Test
 	void testGoto() {
 		expect(4, new byte[] {
-				ICONST_1, GOTO, 0x00, 0x07, ICONST_2, GOTO, 0x00, 0x03, ICONST_3, IADD
+				ICONST_1, GOTO, 0x00, 0x07, ICONST_2, GOTO, 0x00, 0x03, ICONST_3, IADD, IRETURN
 		});
 		expect(4, new byte[] {
-				ICONST_1, GOTO_W, 0x00, 0x00, 0x00, 0x0b, ICONST_2, GOTO_W, 0x00, 0x00, 0x00, 0x05, ICONST_3, IADD
+				ICONST_1, GOTO_W, 0x00, 0x00, 0x00, 0x0b, ICONST_2, GOTO_W, 0x00, 0x00, 0x00, 0x05, ICONST_3, IADD,
+				IRETURN
 		});
 		expect(5, new byte[] {
-				GOTO, 0x00, 0x08, ICONST_1, ICONST_2, GOTO, 0x00, 0x06, GOTO, (byte) 0xff, (byte) -4, ICONST_3, IADD
+				GOTO, 0x00, 0x08, ICONST_1, ICONST_2, GOTO, 0x00, 0x06, GOTO, (byte) 0xff, (byte) -4, ICONST_3, IADD,
+				IRETURN
 		});
 		expect(5, new byte[] {
 				GOTO_W, 0x00, 0x00, 0x00, 0x0c, //
 				ICONST_1, ICONST_2, //
 				GOTO_W, 0x00, 0x00, 0x00, 0x0a, //
 				GOTO_W, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) -6, //
-				ICONST_3, IADD
+				ICONST_3, IADD, IRETURN
 		});
 	}
 	@Test
 	void testIf() {
 		expect(2, new byte[] {
-				ICONST_0, IFEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, IFEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_1, IFEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_1, IFEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_0, IFNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, IFNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_1, IFNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_1, IFNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_0, IFLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, IFLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_1, IFLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_1, IFLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_0, IFLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, IFLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_M1, IFLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_M1, IFLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_M1, IFLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_M1, IFLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_0, IFGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, IFGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_M1, IFGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_M1, IFGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_0, IFGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, IFGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_1, IFGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_1, IFGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_1, IFGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_1, IFGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 	}
 	@Test
 	void testIfCmp() {
 		expect(2, new byte[] {
-				ICONST_0, ICONST_0, IF_ICMPEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, ICONST_0, IF_ICMPEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_0, ICONST_1, IF_ICMPEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, ICONST_1, IF_ICMPEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_0, ICONST_0, IF_ICMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, ICONST_0, IF_ICMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_1, ICONST_0, IF_ICMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_1, ICONST_0, IF_ICMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_0, ICONST_0, IF_ICMPLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, ICONST_0, IF_ICMPLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_0, ICONST_0, IF_ICMPLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, ICONST_0, IF_ICMPLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_M1, ICONST_0, IF_ICMPLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_M1, ICONST_0, IF_ICMPLE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD,
+				IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_1, ICONST_0, IF_ICMPLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_1, ICONST_0, IF_ICMPLT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_0, ICONST_0, IF_ICMPGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, ICONST_0, IF_ICMPGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_0, ICONST_0, IF_ICMPGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, ICONST_0, IF_ICMPGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_1, ICONST_0, IF_ICMPGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_1, ICONST_0, IF_ICMPGE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_M1, ICONST_0, IF_ICMPGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_M1, ICONST_0, IF_ICMPGT, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD,
+				IRETURN
 		});
 		expect(2, new byte[] {
-				ACONST_NULL, ACONST_NULL, IF_ACMPEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ACONST_NULL, ACONST_NULL, IF_ACMPEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD,
+				IRETURN
 		});
 		expect(3, new byte[] {
 				ICONST_0, NEWARRAY, 'Z', ACONST_NULL, IF_ACMPEQ, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2,
-				ICONST_0, IADD
+				ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ACONST_NULL, ACONST_NULL, IF_ACMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ACONST_NULL, ACONST_NULL, IF_ACMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD,
+				IRETURN
 		});
 		expect(2, new byte[] {
 				ICONST_0, NEWARRAY, 'Z', ACONST_NULL, IF_ACMPNE, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2,
-				ICONST_0, IADD
+				ICONST_0, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ACONST_NULL, IFNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ACONST_NULL, IFNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ACONST_NULL, IFNONNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ACONST_NULL, IFNONNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_0, NEWARRAY, 'Z', IFNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, NEWARRAY, 'Z', IFNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD,
+				IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_0, NEWARRAY, 'Z', IFNONNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD
+				ICONST_0, NEWARRAY, 'Z', IFNONNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD,
+				IRETURN
 		});
 	}
 	@Test
 	void testInteger() {
 		expect(24, new byte[] {
-				ICONST_4, ICONST_3, ICONST_1, ICONST_0, ICONST_M1, IADD, ISUB, IMUL, IMUL, INEG
+				ICONST_4, ICONST_3, ICONST_1, ICONST_0, ICONST_M1, IADD, ISUB, IMUL, IMUL, INEG, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_5, NOP, ICONST_2, IREM
+				ICONST_5, NOP, ICONST_2, IREM, IRETURN
 		});
 		expect(1, new byte[] {
-				ICONST_2, ICONST_5, IREM
+				ICONST_2, ICONST_5, IREM, IRETURN
 		});
 		expect(0, new byte[] {
-				ICONST_5, ICONST_2, IDIV
+				ICONST_5, ICONST_2, IDIV, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_2, ICONST_5, IDIV
+				ICONST_2, ICONST_5, IDIV, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_1, ICONST_1, ISHL
+				ICONST_1, ICONST_1, ISHL, IRETURN
 		});
 		expect(-1, new byte[] {
-				ICONST_M1, ICONST_1, ISHR
+				ICONST_M1, ICONST_1, ISHR, IRETURN
 		});
 		expect(-1 >>> 1, new byte[] {
-				ICONST_M1, ICONST_1, IUSHR
+				ICONST_M1, ICONST_1, IUSHR, IRETURN
 		});
 		expect(0, new byte[] {
-				ICONST_1, ICONST_1, ICONST_1, IADD, IAND
+				ICONST_1, ICONST_1, ICONST_1, IADD, IAND, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_1, ICONST_1, ICONST_1, IADD, IOR
+				ICONST_1, ICONST_1, ICONST_1, IADD, IOR, IRETURN
 		});
 		expect(3, new byte[] {
-				ICONST_1, ICONST_1, ICONST_1, IADD, IXOR
+				ICONST_1, ICONST_1, ICONST_1, IADD, IXOR, IRETURN
 		});
 	}
 	@Test
 	void testLong() {
 		expect(1L, new byte[] {
-				LCONST_0, LCONST_1, LADD
+				LCONST_0, LCONST_1, LADD, LRETURN
 		});
 		expect(4L, new byte[] {
-				LCONST_1, LCONST_1, LADD, LCONST_1, LCONST_1, LADD, LMUL
+				LCONST_1, LCONST_1, LADD, LCONST_1, LCONST_1, LADD, LMUL, LRETURN
 		});
 		expect(1L, new byte[] {
-				LCONST_1, LCONST_1, LADD, LCONST_1, LCONST_1, LADD, LDIV
+				LCONST_1, LCONST_1, LADD, LCONST_1, LCONST_1, LADD, LDIV, LRETURN
 		});
 		expect(0L, new byte[] {
-				LCONST_1, LCONST_1, LADD, LCONST_1, LCONST_1, LADD, LREM
+				LCONST_1, LCONST_1, LADD, LCONST_1, LCONST_1, LADD, LREM, LRETURN
 		});
 		expect(1L, new byte[] {
-				LCONST_1, LCONST_1, LADD, LCONST_1, LSUB, LNEG
+				LCONST_1, LCONST_1, LADD, LCONST_1, LSUB, LNEG, LRETURN
 		});
 		expect(2L, new byte[] {
-				LCONST_1, ICONST_1, LSHL
+				LCONST_1, ICONST_1, LSHL, LRETURN
 		});
 		expect(-1L, new byte[] {
-				LCONST_1, LNEG, ICONST_1, LSHR
+				LCONST_1, LNEG, ICONST_1, LSHR, LRETURN
 		});
 		expect(-1L >>> 1, new byte[] {
-				LCONST_1, LNEG, ICONST_1, LUSHR
+				LCONST_1, LNEG, ICONST_1, LUSHR, LRETURN
 		});
 		expect(0L, new byte[] {
-				LCONST_1, LCONST_1, LCONST_1, LADD, LAND
+				LCONST_1, LCONST_1, LCONST_1, LADD, LAND, LRETURN
 		});
 		expect(3L, new byte[] {
-				LCONST_1, LCONST_1, LCONST_1, LADD, LOR
+				LCONST_1, LCONST_1, LCONST_1, LADD, LOR, LRETURN
 		});
 		expect(3L, new byte[] {
-				LCONST_1, LCONST_1, LCONST_1, LADD, LXOR
+				LCONST_1, LCONST_1, LCONST_1, LADD, LXOR, LRETURN
 		});
 	}
 	@Test
@@ -520,36 +546,57 @@ class JVMTest {
 		});
 	}
 	@Test
+	void testReturn() {
+		expect(1, new byte[] {
+				ICONST_1, IRETURN
+		});
+		expect(1L, new byte[] {
+				LCONST_1, LRETURN
+		});
+		expect(1F, new byte[] {
+				FCONST_1, FRETURN
+		});
+		expect(1D, new byte[] {
+				DCONST_1, DRETURN
+		});
+		expect((Object) null, new byte[] {
+				ACONST_NULL, ARETURN
+		});
+		expect((Object) null, new byte[] {
+				RETURN
+		});
+	}
+	@Test
 	void testStackManipulation() {
 		expect(1, new byte[] {
-				ICONST_1, ICONST_0, POP
+				ICONST_1, ICONST_0, POP, IRETURN
 		});
 		expect(1.0D, new byte[] {
-				DCONST_1, DCONST_0, POP2
+				DCONST_1, DCONST_0, POP2, DRETURN
 		});
 		expect(-1, new byte[] {
-				ICONST_0, ICONST_1, SWAP, ISUB
+				ICONST_0, ICONST_1, SWAP, ISUB, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_1, DUP, IADD
+				ICONST_1, DUP, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_1, ICONST_0, DUP_X1, IADD, IADD
+				ICONST_1, ICONST_0, DUP_X1, IADD, IADD, IRETURN
 		});
 		expect(2, new byte[] {
-				ICONST_1, ICONST_0, ICONST_0, DUP_X2, IADD, IADD, IADD
+				ICONST_1, ICONST_0, ICONST_0, DUP_X2, IADD, IADD, IADD, IRETURN
 		});
 		expect(2.0D, new byte[] {
-				DCONST_1, DUP2, DADD
+				DCONST_1, DUP2, DADD, DRETURN
 		});
 		expect(4, new byte[] {
-				ICONST_1, ICONST_1, DUP2, IADD, IADD, IADD
+				ICONST_1, ICONST_1, DUP2, IADD, IADD, IADD, IRETURN
 		});
 		expect(1.0D, new byte[] {
-				DCONST_1, ICONST_5, DUP2_X1, POP2, POP
+				DCONST_1, ICONST_5, DUP2_X1, POP2, POP, DRETURN
 		});
 		expect(2.0D, new byte[] {
-				DCONST_1, DCONST_0, DUP2_X2, DADD, DADD
+				DCONST_1, DCONST_0, DUP2_X2, DADD, DADD, DRETURN
 		});
 	}
 	@Test

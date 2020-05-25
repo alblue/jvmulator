@@ -79,6 +79,9 @@ public class Stack {
 			}
 		}
 	}
+	int size() {
+		return internal.size();
+	}
 	private Slot top(final IntFunction<Slot> op) {
 		final int pos = internal.size() - 1;
 		Slot topslot = op.apply(pos);
