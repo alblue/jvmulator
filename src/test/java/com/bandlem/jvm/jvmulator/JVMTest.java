@@ -602,14 +602,32 @@ class JVMTest {
 	@Test
 	void testSupportedBytecodes() {
 		// Contains the high water mark of implemented features
-		final int max = 153;
+		final int max = 256;
 		for (int b = 0; b < max; b++) {
 			final String name = Opcodes.name((byte) b);
 			// Not defined bytecodes
 			if (name == null)
 				continue;
-			// Not supported yet
+			// Not supported yet - jsr/ret
+			if (name.startsWith("jsr") || name.equals("ret"))
+				continue;
+			// Not supported yet - locals
 			if (name.contains("load") || name.contains("store") || name.contains("ldc") || name.contains("iinc"))
+				continue;
+			// Not supported yet - object
+			if (name.startsWith("get") || name.startsWith("put") || name.startsWith("new") || name.contains("anew"))
+				continue;
+			// Not supported yet - switch
+			if (name.endsWith("switch"))
+				continue;
+			// Not supported yet - invoke, throw and monitor
+			if (name.startsWith("invoke") || name.startsWith("monitor") || name.equals("athrow"))
+				continue;
+			// Not supported yet - type casting
+			if (name.equals("instanceof") || name.equals("checkcast"))
+				continue;
+			// Not supported yet - wide
+			if (name.equals("wide"))
 				continue;
 			int steps = 2;
 			byte[] code;
@@ -628,17 +646,30 @@ class JVMTest {
 			} else {
 				steps = 4;
 				code = new byte[] {
-						ICONST_4, ICONST_3, ICONST_2, ICONST_1, (byte) b, 0x01, 0x02
+						ICONST_4, ICONST_3, ICONST_2, ICONST_1, (byte) b, 0x01, 0x02, 0x03, 0x04
 				};
 			}
 			if (name.endsWith("shr") || name.endsWith("shl")) {
 				code[1] = ICONST_0;
 			}
+			if (name.startsWith("if_acmp") || name.equals("areturn") || name.endsWith("null")) {
+				code[2] = ACONST_NULL;
+				code[3] = ACONST_NULL;
+			}
+			if (name.equals("arraylength")) {
+				code[2] = NEWARRAY;
+				code[3] = 'Z';
+			}
 			final JVMFrame frame = new JVMFrame(code);
 			while (steps-- > 0) {
 				frame.step();
 			}
-			assertDoesNotThrow(frame::step, "Opcode " + name + " not supported (" + b + ")");
+			if (b >= 202) {
+				// breakpoint and above throw
+				assertThrows(IllegalArgumentException.class, frame::step);
+			} else {
+				assertDoesNotThrow(frame::step, "Opcode " + name + " not supported (" + b + ")");
+			}
 		}
 	}
 }
