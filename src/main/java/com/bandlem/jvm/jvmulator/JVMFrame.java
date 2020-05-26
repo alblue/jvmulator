@@ -14,9 +14,6 @@ public class JVMFrame {
 	private boolean returning;
 	private Slot returnValue;
 	final Stack stack = new Stack();
-	public JVMFrame(final byte[] code) {
-		this(code, 0);
-	}
 	public JVMFrame(final byte[] code, final int locals) {
 		this.bytecode = code;
 		this.locals = new Slot[locals];
@@ -560,12 +557,19 @@ public class JVMFrame {
 			return;
 		}
 		case Opcodes.BASTORE:
+			// Fallthrough
 		case Opcodes.SASTORE:
+			// Fallthrough
 		case Opcodes.CASTORE:
+			// Fallthrough
 		case Opcodes.IASTORE:
+			// Fallthrough
 		case Opcodes.LASTORE:
+			// Fallthrough
 		case Opcodes.FASTORE:
+			// Fallthrough
 		case Opcodes.DASTORE:
+			// Fallthrough
 		case Opcodes.AASTORE: {
 			final Slot value = stack.pop();
 			final int index = stack.popInt();
@@ -594,12 +598,19 @@ public class JVMFrame {
 			return;
 		}
 		case Opcodes.BALOAD:
+			// Fallthrough
 		case Opcodes.SALOAD:
+			// Fallthrough
 		case Opcodes.CALOAD:
+			// Fallthrough
 		case Opcodes.IALOAD:
+			// Fallthrough
 		case Opcodes.LALOAD:
+			// Fallthrough
 		case Opcodes.FALOAD:
+			// Fallthrough
 		case Opcodes.DALOAD:
+			// Fallthrough
 		case Opcodes.AALOAD: {
 			final int index = stack.popInt();
 			final Object array = stack.popReference();
@@ -626,6 +637,162 @@ public class JVMFrame {
 			}
 			return;
 		}
+		// Locals
+		case Opcodes.IINC: {
+			final int local = bytecode[pc++] & 0xff;
+			locals[local] = Slot.of(locals[local].intValue() + bytecode[pc++]);
+			return;
+		}
+		case Opcodes.ILOAD:
+			stack.push(locals[bytecode[pc++] & 0xff].intValue());
+			return;
+		case Opcodes.ILOAD_0:
+			stack.push(locals[0].intValue());
+			return;
+		case Opcodes.ILOAD_1:
+			stack.push(locals[1].intValue());
+			return;
+		case Opcodes.ILOAD_2:
+			stack.push(locals[2].intValue());
+			return;
+		case Opcodes.ILOAD_3:
+			stack.push(locals[3].intValue());
+			return;
+		case Opcodes.ISTORE:
+			locals[bytecode[pc++] & 0xff] = Slot.of(stack.popInt());
+			return;
+		case Opcodes.ISTORE_0:
+			locals[0] = Slot.of(stack.popInt());
+			return;
+		case Opcodes.ISTORE_1:
+			locals[1] = Slot.of(stack.popInt());
+			return;
+		case Opcodes.ISTORE_2:
+			locals[2] = Slot.of(stack.popInt());
+			return;
+		case Opcodes.ISTORE_3:
+			locals[3] = Slot.of(stack.popInt());
+			return;
+		case Opcodes.LLOAD:
+			stack.push(locals[bytecode[pc++] & 0xff].longValue());
+			return;
+		case Opcodes.LLOAD_0:
+			stack.push(locals[0].longValue());
+			return;
+		case Opcodes.LLOAD_1:
+			stack.push(locals[1].longValue());
+			return;
+		case Opcodes.LLOAD_2:
+			stack.push(locals[2].longValue());
+			return;
+		case Opcodes.LLOAD_3:
+			stack.push(locals[3].longValue());
+			return;
+		case Opcodes.LSTORE:
+			locals[bytecode[pc++] & 0xff] = Slot.of(stack.popLong());
+			return;
+		case Opcodes.LSTORE_0:
+			locals[0] = Slot.of(stack.popLong());
+			return;
+		case Opcodes.LSTORE_1:
+			locals[1] = Slot.of(stack.popLong());
+			return;
+		case Opcodes.LSTORE_2:
+			locals[2] = Slot.of(stack.popLong());
+			return;
+		case Opcodes.LSTORE_3:
+			locals[3] = Slot.of(stack.popLong());
+			return;
+		case Opcodes.FLOAD:
+			stack.push(locals[bytecode[pc++] & 0xff].floatValue());
+			return;
+		case Opcodes.FLOAD_0:
+			stack.push(locals[0].floatValue());
+			return;
+		case Opcodes.FLOAD_1:
+			stack.push(locals[1].floatValue());
+			return;
+		case Opcodes.FLOAD_2:
+			stack.push(locals[2].floatValue());
+			return;
+		case Opcodes.FLOAD_3:
+			stack.push(locals[3].floatValue());
+			return;
+		case Opcodes.FSTORE:
+			locals[bytecode[pc++] & 0xff] = Slot.of(stack.popFloat());
+			return;
+		case Opcodes.FSTORE_0:
+			locals[0] = Slot.of(stack.popFloat());
+			return;
+		case Opcodes.FSTORE_1:
+			locals[1] = Slot.of(stack.popFloat());
+			return;
+		case Opcodes.FSTORE_2:
+			locals[2] = Slot.of(stack.popFloat());
+			return;
+		case Opcodes.FSTORE_3:
+			locals[3] = Slot.of(stack.popFloat());
+			return;
+		case Opcodes.DLOAD:
+			stack.push(locals[bytecode[pc++] & 0xff].doubleValue());
+			return;
+		case Opcodes.DLOAD_0:
+			stack.push(locals[0].doubleValue());
+			return;
+		case Opcodes.DLOAD_1:
+			stack.push(locals[1].doubleValue());
+			return;
+		case Opcodes.DLOAD_2:
+			stack.push(locals[2].doubleValue());
+			return;
+		case Opcodes.DLOAD_3:
+			stack.push(locals[3].doubleValue());
+			return;
+		case Opcodes.DSTORE:
+			locals[bytecode[pc++] & 0xff] = Slot.of(stack.popDouble());
+			return;
+		case Opcodes.DSTORE_0:
+			locals[0] = Slot.of(stack.popDouble());
+			return;
+		case Opcodes.DSTORE_1:
+			locals[1] = Slot.of(stack.popDouble());
+			return;
+		case Opcodes.DSTORE_2:
+			locals[2] = Slot.of(stack.popDouble());
+			return;
+		case Opcodes.DSTORE_3:
+			locals[3] = Slot.of(stack.popDouble());
+			return;
+		case Opcodes.ALOAD:
+			stack.push(locals[bytecode[pc++] & 0xff].referenceValue());
+			return;
+		case Opcodes.ALOAD_0:
+			stack.push(locals[0].referenceValue());
+			return;
+		case Opcodes.ALOAD_1:
+			stack.push(locals[1].referenceValue());
+			return;
+		case Opcodes.ALOAD_2:
+			stack.push(locals[2].referenceValue());
+			return;
+		case Opcodes.ALOAD_3:
+			stack.push(locals[3].referenceValue());
+			return;
+		case Opcodes.ASTORE:
+			locals[bytecode[pc++] & 0xff] = Slot.of(stack.popReference());
+			return;
+		case Opcodes.ASTORE_0:
+			locals[0] = Slot.of(stack.popReference());
+			return;
+		case Opcodes.ASTORE_1:
+			locals[1] = Slot.of(stack.popReference());
+			return;
+		case Opcodes.ASTORE_2:
+			locals[2] = Slot.of(stack.popReference());
+			return;
+		case Opcodes.ASTORE_3:
+			locals[3] = Slot.of(stack.popReference());
+			return;
 		// Miscellaneous
 		case Opcodes.IMPDEP1:
 			// Fallthrough
