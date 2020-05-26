@@ -495,6 +495,15 @@ class JVMTest {
 		});
 	}
 	@Test
+	void testJSR() {
+		expect(3, 2, new byte[] {
+				ICONST_3, JSR, 0x00, 0x04, IRETURN, ASTORE_1, RET, 0x01
+		});
+		expect(2, 2, new byte[] {
+				ICONST_2, JSR_W, 0x00, 0x00, 0x00, 0x06, IRETURN, ASTORE_0, RET, 0x00
+		});
+	}
+	@Test
 	void testLocals() {
 		expect(1, 5, new byte[] {
 				ICONST_1, ISTORE_0, ILOAD_0, ISTORE_1, ILOAD_1, ISTORE_2, ILOAD_2, ISTORE_3, ILOAD_3, ISTORE, 4, ILOAD,
@@ -654,9 +663,6 @@ class JVMTest {
 			final String name = Opcodes.name((byte) b);
 			// Not defined bytecodes
 			if (name == null)
-				continue;
-			// Not supported yet - jsr/ret
-			if (name.startsWith("jsr") || name.equals("ret"))
 				continue;
 			// Not supported yet - locals
 			if (name.contains("ldc"))

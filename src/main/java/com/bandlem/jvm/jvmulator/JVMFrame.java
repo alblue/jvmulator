@@ -329,6 +329,19 @@ public class JVMFrame {
 			return;
 		}
 		// Branching
+		case Opcodes.RET: {
+			final int local = bytecode[pc++] & 0xff;
+			pc = (int) (locals[local].referenceValue());
+			return;
+		}
+		case Opcodes.JSR_W:
+			stack.push((Object) (pc + 4));
+			pc += bytecode[pc++] << 24 | bytecode[pc++] << 16 | bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			return;
+		case Opcodes.JSR:
+			stack.push((Object) (pc + 2));
+			pc += bytecode[pc++] << 8 | bytecode[pc++] - 1;
+			return;
 		case Opcodes.GOTO_W: {
 			pc += bytecode[pc++] << 24 | bytecode[pc++] << 16 | bytecode[pc++] << 8 | bytecode[pc++] - 1;
 			return;
