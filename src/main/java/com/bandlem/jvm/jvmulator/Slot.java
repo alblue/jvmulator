@@ -12,6 +12,10 @@ public abstract class Slot {
 		public DoubleSlot(final double value) {
 			super(value, true);
 		}
+		@Override
+		public String toString() {
+			return String.valueOf(value);
+		}
 	}
 	public static class Empty extends Slot {
 		protected Empty() {
@@ -22,20 +26,36 @@ public abstract class Slot {
 		public FloatSlot(final float value) {
 			super(value, false);
 		}
+		@Override
+		public String toString() {
+			return String.valueOf(value);
+		}
 	}
 	private static class IntSlot extends Slot {
 		public IntSlot(final int value) {
 			super(value, false);
+		}
+		@Override
+		public String toString() {
+			return String.valueOf(value);
 		}
 	}
 	private static class LongSlot extends Slot {
 		public LongSlot(final long value) {
 			super(value, true);
 		}
+		@Override
+		public String toString() {
+			return String.valueOf(value);
+		}
 	}
 	private static class ReferenceSlot extends Slot {
 		public ReferenceSlot(final Object value) {
 			super(value, false);
+		}
+		@Override
+		public String toString() {
+			return String.valueOf(value);
 		}
 	}
 	private static final Slot EMPTY = new Empty();
