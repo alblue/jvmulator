@@ -76,34 +76,34 @@ public class ConstantPool {
 		public static Item read(final DataInput di) throws IOException {
 			final byte type = di.readByte();
 			switch (type) {
-			case NameAndType.TYPE:
-				return new NameAndType(di.readShort(), di.readShort());
-			case UTFConstant.TYPE:
+			case UTFConstant.TYPE: // 1
 				return new UTFConstant(di.readUTF());
-			case ClassConstant.TYPE:
-				return new ClassConstant(di.readShort());
-			case StringConstant.TYPE:
-				return new StringConstant(di.readShort());
-			case FloatConstant.TYPE:
-				return new FloatConstant(di.readFloat());
-			case IntConstant.TYPE:
+			case IntConstant.TYPE: // 3
 				return new IntConstant(di.readInt());
-			case LongConstant.TYPE:
+			case FloatConstant.TYPE: // 4
+				return new FloatConstant(di.readFloat());
+			case LongConstant.TYPE: // 5
 				return new LongConstant(di.readLong());
-			case DoubleConstant.TYPE:
+			case DoubleConstant.TYPE: // 6
 				return new DoubleConstant(di.readDouble());
-			case InterfaceMethodRef.TYPE:
-				return new InterfaceMethodRef(di.readShort(), di.readShort());
-			case FieldRef.TYPE:
+			case ClassConstant.TYPE: // 7
+				return new ClassConstant(di.readShort());
+			case StringConstant.TYPE: // 8
+				return new StringConstant(di.readShort());
+			case FieldRef.TYPE: // 9
 				return new FieldRef(di.readShort(), di.readShort());
-			case MethodRef.TYPE:
+			case MethodRef.TYPE: // 10
 				return new MethodRef(di.readShort(), di.readShort());
-			case InvokeDynamic.TYPE:
-				return new InvokeDynamic(di.readShort(), di.readShort());
-			case MethodHandle.TYPE:
+			case InterfaceMethodRef.TYPE: // 11
+				return new InterfaceMethodRef(di.readShort(), di.readShort());
+			case NameAndType.TYPE: // 12
+				return new NameAndType(di.readShort(), di.readShort());
+			case MethodHandle.TYPE: // 15
 				return new MethodHandle(di.readByte(), di.readShort());
-			case MethodType.TYPE:
+			case MethodType.TYPE: // 16
 				return new MethodType(di.readShort());
+			case InvokeDynamic.TYPE: // 18
+				return new InvokeDynamic(di.readShort(), di.readShort());
 			default:
 				throw new IllegalArgumentException("Unknown type " + type);
 			}
