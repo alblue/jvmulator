@@ -104,6 +104,10 @@ public class ConstantPool {
 				return new MethodType(di.readShort());
 			case InvokeDynamic.TYPE: // 18
 				return new InvokeDynamic(di.readShort(), di.readShort());
+			case Module.TYPE: // 19
+				return new Module(di.readShort());
+			case Package.TYPE: // 20
+				return new Package(di.readShort());
 			default:
 				throw new IllegalArgumentException("Unknown type " + type);
 			}
@@ -152,6 +156,14 @@ public class ConstantPool {
 			this.descriptorIndex = descriptorIndex;
 		}
 	}
+	public static class Module extends Item {
+		public static final int TYPE = 19;
+		public final short nameIndex;
+		Module(final short nameIndex) {
+			super(TYPE);
+			this.nameIndex = nameIndex;
+		}
+	}
 	public static class NameAndType extends Item {
 		private static final int TYPE = 12;
 		public final short descriptorIndex;
@@ -160,6 +172,14 @@ public class ConstantPool {
 			super(TYPE);
 			this.nameIndex = nameIndex;
 			this.descriptorIndex = descriptorIndex;
+		}
+	}
+	public static class Package extends Item {
+		public static final int TYPE = 20;
+		public final short nameIndex;
+		Package(final short nameIndex) {
+			super(TYPE);
+			this.nameIndex = nameIndex;
 		}
 	}
 	public static class StringConstant extends Item {

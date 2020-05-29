@@ -26,7 +26,9 @@ import com.bandlem.jvm.jvmulator.classfile.ConstantPool.LongConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.MethodHandle;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.MethodRef;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.MethodType;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.Module;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.NameAndType;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.Package;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.StringConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.UTFConstant;
 public class ConstantPoolTest {
@@ -90,7 +92,13 @@ public class ConstantPoolTest {
 		assertEquals(0x222, invokeDynamicItem.bootstrapIndex);
 		assertEquals(0x424, invokeDynamicItem.nameAndTypeIndex);
 		assertThrows(IllegalArgumentException.class, invokeDynamicItem::stringValue);
-		assertThrows(IllegalArgumentException.class, () -> item(0x13));
+		assertThrows(IllegalArgumentException.class, () -> item(0x2));
+		final Module moduleItem = (Module) item(0x13, 0x04, 0x02);
+		assertEquals(19, moduleItem.type);
+		assertEquals(0x402, moduleItem.nameIndex);
+		final Package packageItem = (Package) item(0x14, 0x07, 0x47);
+		assertEquals(20, packageItem.type);
+		assertEquals(0x747, packageItem.nameIndex);
 	}
 	@Test
 	void testPool() throws IOException {
