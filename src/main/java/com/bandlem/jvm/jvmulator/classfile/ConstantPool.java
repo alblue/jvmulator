@@ -11,7 +11,7 @@ import java.io.DataInput;
 import java.io.IOException;
 public class ConstantPool {
 	public static class ClassConstant extends Item {
-		private static final int TYPE = 7;
+		public static final int TYPE = 7;
 		public final short index;
 		ClassConstant(final short index) {
 			super(TYPE);
@@ -19,7 +19,7 @@ public class ConstantPool {
 		}
 	}
 	public static class DoubleConstant extends Item {
-		private static final int TYPE = 6;
+		public static final int TYPE = 6;
 		public final double value;
 		DoubleConstant(final double value) {
 			super(TYPE);
@@ -27,7 +27,7 @@ public class ConstantPool {
 		}
 	}
 	public static class FieldRef extends Item {
-		private static final int TYPE = 9;
+		public static final int TYPE = 9;
 		public final short classIndex;
 		public final short nameAndTypeIndex;
 		FieldRef(final short classIndex, final short nameAndTypeIndex) {
@@ -37,7 +37,7 @@ public class ConstantPool {
 		}
 	}
 	public static class FloatConstant extends Item {
-		private static final int TYPE = 4;
+		public static final int TYPE = 4;
 		public final float value;
 		FloatConstant(final float value) {
 			super(TYPE);
@@ -45,7 +45,7 @@ public class ConstantPool {
 		}
 	}
 	public static class IntConstant extends Item {
-		private static final int TYPE = 3;
+		public static final int TYPE = 3;
 		public final int value;
 		IntConstant(final int value) {
 			super(TYPE);
@@ -53,7 +53,7 @@ public class ConstantPool {
 		}
 	}
 	public static class InterfaceMethodRef extends Item {
-		private static final int TYPE = 11;
+		public static final int TYPE = 11;
 		public final short classIndex;
 		public final short nameAndTypeIndex;
 		InterfaceMethodRef(final short classIndex, final short nameAndTypeIndex) {
@@ -121,7 +121,7 @@ public class ConstantPool {
 		}
 	}
 	public static class LongConstant extends Item {
-		private static final int TYPE = 5;
+		public static final int TYPE = 5;
 		public final long value;
 		LongConstant(final long value) {
 			super(TYPE);
@@ -139,7 +139,7 @@ public class ConstantPool {
 		}
 	}
 	public static class MethodRef extends Item {
-		private static final int TYPE = 10;
+		public static final int TYPE = 10;
 		public final short classIndex;
 		public final short nameAndTypeIndex;
 		MethodRef(final short classIndex, final short nameAndTypeIndex) {
@@ -165,7 +165,7 @@ public class ConstantPool {
 		}
 	}
 	public static class NameAndType extends Item {
-		private static final int TYPE = 12;
+		public static final int TYPE = 12;
 		public final short descriptorIndex;
 		public final short nameIndex;
 		NameAndType(final short nameIndex, final short descriptorIndex) {
@@ -183,7 +183,7 @@ public class ConstantPool {
 		}
 	}
 	public static class StringConstant extends Item {
-		private static final int TYPE = 8;
+		public static final int TYPE = 8;
 		public final short index;
 		StringConstant(final short index) {
 			super(TYPE);
@@ -191,7 +191,7 @@ public class ConstantPool {
 		}
 	}
 	public static class UTFConstant extends Item {
-		private static final int TYPE = 1;
+		public static final int TYPE = 1;
 		public final String value;
 		UTFConstant(final String value) {
 			super(TYPE);

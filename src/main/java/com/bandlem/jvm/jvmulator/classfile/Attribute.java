@@ -16,19 +16,14 @@ public abstract class Attribute {
 		private final byte[] bytecode;
 		private final short maxLocals;
 		private final short maxStack;
-		public Code(final byte[] data) {
-			super(NAME, data);
-			try {
-				final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
-				maxStack = dis.readShort();
-				maxLocals = dis.readShort();
-				bytecode = new byte[dis.readInt()];
-				dis.readFully(bytecode);
-				// exception table
-				// code attributes
-			} catch (final IOException e) {
-				throw new IllegalArgumentException("Unable to parse CodeAttribute", e);
-			}
+		public Code(final DataInputStream dis) throws IOException {
+			super(NAME);
+			maxStack = dis.readShort();
+			maxLocals = dis.readShort();
+			bytecode = new byte[dis.readInt()];
+			dis.readFully(bytecode);
+			// exception table
+			// code attributes
 		}
 		public byte[] getBytecode() {
 			return bytecode;
@@ -40,22 +35,41 @@ public abstract class Attribute {
 			return maxStack;
 		}
 	}
+	public static class SourceFile extends Attribute {
+		public static final String NAME = "SourceFile";
+		public final String file;
+		public SourceFile(final DataInputStream dis, final ConstantPool pool) throws IOException {
+			super(NAME);
+			this.file = pool.getString(dis.readShort());
+		}
+		@Override
+		public String toString() {
+			return file;
+		}
+	}
 	public static class Unknown extends Attribute {
-		public Unknown(final String name, final byte[] data) {
-			super(name, data);
+		public final byte[] data;
+		public Unknown(final String attributeName, final byte[] data) {
+			super(attributeName);
+			this.data = data;
 		}
 	}
-	public static Attribute of(final String name, final byte[] data) {
-		if (Code.NAME.equals(name)) {
-			return new Code(data);
-		} else {
-			return new Unknown(name, data);
+	public static Attribute of(final String attributeName, final ConstantPool pool, final byte[] data) {
+		try {
+			final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
+			if (Code.NAME.equals(attributeName)) {
+				return new Code(dis);
+			} else if (SourceFile.NAME.equals(attributeName)) {
+				return new SourceFile(dis, pool);
+			} else {
+				return new Unknown(attributeName, data);
+			}
+		} catch (final IOException e) {
+			throw new IllegalArgumentException("Unable to parse " + attributeName, e);
 		}
 	}
-	public final byte[] data;
-	public final String name;
-	public Attribute(final String name, final byte[] data) {
-		this.name = name;
-		this.data = data;
+	public final String attributeName;
+	public Attribute(final String attributeName) {
+		this.attributeName = attributeName;
 	}
 }

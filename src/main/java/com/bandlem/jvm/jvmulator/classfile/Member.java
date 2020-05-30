@@ -31,7 +31,7 @@ public abstract class Member {
 	}
 	public Attribute getAttribute(final String name) {
 		for (final Attribute attribute : attributes) {
-			if (name.equals(attribute.name)) {
+			if (name.equals(attribute.attributeName)) {
 				return attribute;
 			}
 		}
