@@ -32,9 +32,7 @@ public class JavaClass {
 			this.pool = new ConstantPool(di.readShort(), di);
 			this.flags = di.readShort();
 			this.this_class = pool.getClassName(di.readShort());
-			System.out.println("This class: " + this_class);
 			this.super_class = pool.getClassName(di.readShort());
-			System.out.println("Super class: " + super_class);
 			this.interfaces = new String[di.readShort() & 0xffff];
 			for (int i = 0; i < interfaces.length; i++) {
 				interfaces[i] = pool.getClassName(di.readShort());

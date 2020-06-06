@@ -30,7 +30,6 @@ public class JavaClassTest {
 	@BeforeEach
 	void setupClass() {
 		final String name = ClassUnderTest.class.getName().replace('.', '/') + ".class";
-		System.out.println("Name is" + name);
 		final InputStream stream = ClassUnderTest.class.getClassLoader().getResourceAsStream(name);
 		classUnderTest = new JavaClass(new DataInputStream(stream));
 		assertNotNull(classUnderTest);
