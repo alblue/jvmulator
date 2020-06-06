@@ -60,6 +60,8 @@ public class JavaClassTest {
 		assertEquals(JavaClassTest.class.getSimpleName() + ".java",
 				classUnderTest.getAttribute("SourceFile").toString());
 		assertNull(classUnderTest.getAttribute("WhoNose"));
+		assertThrows(IllegalArgumentException.class, () -> pool.getItem(0));
+		assertEquals(System.getProperty("java.class.version"), classUnderTest.major + "." + classUnderTest.minor);
 	}
 	@Test
 	void testInvalidClass() {

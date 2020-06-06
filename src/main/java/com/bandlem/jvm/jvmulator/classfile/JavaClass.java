@@ -27,8 +27,8 @@ public class JavaClass {
 			if (di.readInt() != 0xcafebabe) {
 				throw new IllegalArgumentException("Content is not a class file");
 			}
-			this.major = di.readShort();
 			this.minor = di.readShort();
+			this.major = di.readShort();
 			this.pool = new ConstantPool(di.readShort(), di);
 			this.flags = di.readShort();
 			this.this_class = pool.getClassName(di.readShort());
