@@ -51,8 +51,10 @@ public class GUI extends JPanel {
 		System.setOut(out);
 	}
 	public void addMethod(final Method method) {
-		methods.addItem(method);
-		enableButtons(true);
+		if (method.getDeclaringClass() != Object.class) {
+			methods.addItem(method);
+			enableButtons(true);
+		}
 	}
 	public void clearConsole() {
 		console.setText("");

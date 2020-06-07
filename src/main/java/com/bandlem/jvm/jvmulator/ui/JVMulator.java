@@ -9,6 +9,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import com.bandlem.jvm.jvmulator.JVMFrame;
 import com.bandlem.jvm.jvmulator.Opcodes;
+import com.bandlem.jvm.jvmulator.Slot;
+import com.bandlem.jvm.jvmulator.Stack;
 import com.bandlem.jvm.jvmulator.classfile.Attribute.Code;
 import com.bandlem.jvm.jvmulator.classfile.JavaClass;
 import com.bandlem.jvm.jvmulator.classfile.Member.Method;
@@ -43,7 +45,7 @@ public class JVMulator extends JPanel {
 		bytecode.setMinimumSize(minimumSize);
 		locals.setMinimumSize(minimumSize);
 		stack.setMinimumSize(minimumSize);
-		add(new JButton(new StepAction(this)));
+		add(new JButton(new StepAction(this)), GUI.constraints(0, 1));
 	}
 	private void displayCode() {
 		final StringBuilder builder = new StringBuilder(code.length * 10);
@@ -61,6 +63,22 @@ public class JVMulator extends JPanel {
 		}
 		bytecode.setText(builder.toString());
 	}
+	private void displayLocals() {
+		final Slot[] l = frame.getLocals();
+		final StringBuilder builder = new StringBuilder(l.length * 10);
+		for (int s = 0; s < l.length; s++) {
+			builder.append(String.format("[%02d] %s\n", s, l[s].toString()));
+		}
+		locals.setText(builder.toString());
+	}
+	private void displayStack() {
+		final Stack s = frame.getStack();
+		final StringBuilder builder = new StringBuilder(s.size() * 10);
+		for (int ss = 0; ss < s.size(); ss++) {
+			builder.append(String.format("[%02d] %s\n", ss, s.at(ss).toString()));
+		}
+		stack.setText(builder.toString());
+	}
 	@Override
 	public void setName(final String name) {
 		final Method method = javaClass.getMethod(name);
@@ -69,14 +87,18 @@ public class JVMulator extends JPanel {
 		} else {
 			final Code codeAttribute = method.getCodeAttribute();
 			code = codeAttribute.getBytecode();
-			frame = new JVMFrame(code, codeAttribute.getMaxLocals());
+			frame = new JVMFrame(javaClass, code, codeAttribute.getMaxLocals());
 			displayCode();
+			displayLocals();
+			displayStack();
 		}
 	}
 	public void step() {
 		if (pc >= 0 && frame.step()) {
 			pc = frame.getPC();
 			displayCode();
+			displayLocals();
+			displayStack();
 		} else {
 			pc = -1;
 			JOptionPane.showMessageDialog(null, "Return value: " + frame.getReturnValue(), "Returned",

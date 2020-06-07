@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.function.IntFunction;
 public class Stack {
 	private final List<Slot> internal = new ArrayList<>();
+	public Slot at(final int i) {
+		return internal.get(i);
+	}
 	public void dup() {
 		internal.add(internal.get(internal.size() - 1));
 	}
@@ -79,7 +82,7 @@ public class Stack {
 			}
 		}
 	}
-	int size() {
+	public int size() {
 		return internal.size();
 	}
 	private Slot top(final IntFunction<Slot> op) {

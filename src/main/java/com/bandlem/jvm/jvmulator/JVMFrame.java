@@ -7,15 +7,26 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 package com.bandlem.jvm.jvmulator;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.DoubleConstant;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.FloatConstant;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.IntConstant;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.Item;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.LongConstant;
+import com.bandlem.jvm.jvmulator.classfile.JavaClass;
 public class JVMFrame {
 	private final byte[] bytecode;
+	private final JavaClass javaClass;
 	private final Slot[] locals;
 	private int pc;
 	private Slot returnValue;
 	final Stack stack = new Stack();
-	public JVMFrame(final byte[] code, final int locals) {
+	public JVMFrame(final JavaClass javaClass, final byte[] code, final int locals) {
 		this.bytecode = code;
 		this.locals = new Slot[locals];
+		this.javaClass = javaClass;
+	}
+	public Slot[] getLocals() {
+		return locals;
 	}
 	public int getPC() {
 		return pc;
@@ -23,11 +34,28 @@ public class JVMFrame {
 	public Slot getReturnValue() {
 		return returnValue;
 	}
+	public Stack getStack() {
+		return stack;
+	}
 	private Slot notWide(final Slot slot, final byte opcode) {
 		if (slot.isWide()) {
 			throw new IllegalStateException("Cannot use wide slot for opcode " + opcode);
 		}
 		return slot;
+	}
+	private void pushConstant(final int constant) {
+		final Item item = javaClass.pool.getItem(constant);
+		if (item instanceof IntConstant) {
+			stack.push(((IntConstant) item).value);
+		} else if (item instanceof LongConstant) {
+			stack.push(((LongConstant) item).value);
+		} else if (item instanceof FloatConstant) {
+			stack.push(((FloatConstant) item).value);
+		} else if (item instanceof DoubleConstant) {
+			stack.push(((DoubleConstant) item).value);
+		} else {
+			throw new UnsupportedOperationException("Unknown item type " + item.type);
+		}
 	}
 	public Slot run() {
 		returnValue = null;
@@ -805,6 +833,15 @@ public class JVMFrame {
 		case Opcodes.ASTORE_3:
 			locals[3] = Slot.of(stack.popReference());
 			return true;
+		case Opcodes.LDC:
+			pushConstant(bytecode[pc++] & 0xff);
+			return true;
+		case Opcodes.LDC_W:
+			pushConstant((bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
+			return true;
+		case Opcodes.LDC2_W:
+			pushConstant((bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
+			return true;
 		// Miscellaneous
 		case Opcodes.IMPDEP1:
 			// Fallthrough
@@ -813,7 +850,7 @@ public class JVMFrame {
 		case Opcodes.BREAKPOINT:
 			throw new IllegalArgumentException(Opcodes.name(opcode) + " should not be found here");
 		default:
-			throw new IllegalStateException("Unknown opcode: " + Opcodes.name(opcode) + " [" + opcode + "]");
+			throw new IllegalStateException("Unknown opcode: " + Opcodes.name(opcode) + " [" + (opcode & 0xff) + "]");
 		}
 	}
 }

@@ -21,6 +21,10 @@ public abstract class Slot {
 		protected Empty() {
 			super(null, false);
 		}
+		@Override
+		public String toString() {
+			return "---";
+		}
 	}
 	private static class FloatSlot extends Slot {
 		public FloatSlot(final float value) {

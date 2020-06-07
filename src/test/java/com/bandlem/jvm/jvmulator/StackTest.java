@@ -24,6 +24,8 @@ public class StackTest {
 	@Test
 	void testBadStack() {
 		stack.push(0);
+		assertEquals(0, stack.at(0).intValue());
+		assertEquals(1, stack.size());
 		stack.pushSlot(Slot.empty());
 		assertThrows(IllegalStateException.class, stack::peek);
 		assertThrows(IllegalStateException.class, stack::pop);

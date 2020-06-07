@@ -35,6 +35,7 @@ public class SlotTest {
 	@Test
 	void testEmptySlot() {
 		final Slot slot = empty;
+		assertEquals("---", slot.toString());
 		assertFalse(slot.isWide());
 		assertThrows(ClassCastException.class, slot::intValue);
 		assertThrows(ClassCastException.class, slot::longValue);
