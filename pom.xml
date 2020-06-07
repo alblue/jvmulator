@@ -12,16 +12,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
+		<exec.mainClass>com.bandlem.jvm.jvmulator.ui.GUI</exec.mainClass>
 	</properties>
 	<organization>
 		<name>Bandlem Limited</name>
 	</organization>
 	<dependencies>
-		<dependency>
-			<groupId>net.bytebuddy</groupId>
-			<artifactId>byte-buddy</artifactId>
-			<version>1.10.10</version>
-		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
@@ -41,6 +37,18 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.22.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>${exec.mainClass}</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -109,7 +117,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>

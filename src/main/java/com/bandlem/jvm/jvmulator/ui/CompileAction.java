@@ -31,6 +31,7 @@ class CompileAction extends AbstractAction {
 				for (final var method : exampleClass.getMethods()) {
 					gui.addMethod(method);
 				}
+				gui.setClassBytes(compiler.getBytes("Example"));
 			} catch (final ClassNotFoundException e) {
 				JOptionPane.showMessageDialog(gui, "Unable to load class", "Compiler Error", JOptionPane.ERROR_MESSAGE);
 			}

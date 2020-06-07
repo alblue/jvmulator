@@ -13,6 +13,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 public class GUI extends JPanel {
 	private static final long serialVersionUID = 1L;
+	static GridBagConstraints constraints(final int x, final int y) {
+		return new GridBagConstraints(x, y, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+				new Insets(0, 0, 0, 0), 0, 0);
+	}
 	public static void main(final String[] args) {
 		final JFrame frame = new JFrame("JVMulator");
 		final GUI gui = new GUI();
@@ -21,12 +25,14 @@ public class GUI extends JPanel {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
+	private byte[] classBytes;
 	private final Action compile = new CompileAction(this);
-	private final JTextArea console = new JTextArea("", 20, 20);
+	private final JTextArea console = new JTextArea("", 100, 100);
+	private final Action emulate = new EmulateAction(this);
 	private final Action invoke = new InvokeAction(this);
 	private final JComboBox<Method> methods = new JComboBox<>();
 	private final OutTextArea out = new OutTextArea(console, System.out);
-	private final JTextArea source = new JTextArea(getExample(), 20, 20);
+	private final JTextArea source = new JTextArea(getExample(), 100, 100);
 	public GUI() {
 		final Font monospaced = new Font(Font.MONOSPACED, Font.PLAIN, 24);
 		if (monospaced != null) {
@@ -41,6 +47,7 @@ public class GUI extends JPanel {
 		add(new JButton(compile), constraints(0, 1));
 		add(new JButton(invoke), constraints(1, 1));
 		add(methods, constraints(0, 2));
+		add(new JButton(emulate), constraints(1, 2));
 		System.setOut(out);
 	}
 	public void addMethod(final Method method) {
@@ -54,13 +61,13 @@ public class GUI extends JPanel {
 		methods.removeAllItems();
 		enableButtons(false);
 	}
-	private GridBagConstraints constraints(final int x, final int y) {
-		return new GridBagConstraints(x, y, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-				new Insets(0, 0, 0, 0), 0, 0);
-	}
 	private void enableButtons(final boolean enabled) {
 		invoke.setEnabled(enabled);
 		methods.setEnabled(enabled);
+		emulate.setEnabled(enabled);
+	}
+	public byte[] getClassBytes() {
+		return classBytes;
 	}
 	private String getExample() {
 		return "public class Example {\n" //
@@ -77,5 +84,8 @@ public class GUI extends JPanel {
 	}
 	public String getSource() {
 		return source.getText();
+	}
+	public void setClassBytes(final byte[] bytes) {
+		this.classBytes = bytes;
 	}
 }
