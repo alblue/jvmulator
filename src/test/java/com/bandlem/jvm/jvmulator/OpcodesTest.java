@@ -7,6 +7,60 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 package com.bandlem.jvm.jvmulator;
+import static com.bandlem.jvm.jvmulator.Opcodes.ALOAD;
+import static com.bandlem.jvm.jvmulator.Opcodes.ANEWARRAY;
+import static com.bandlem.jvm.jvmulator.Opcodes.ASTORE;
+import static com.bandlem.jvm.jvmulator.Opcodes.BIPUSH;
+import static com.bandlem.jvm.jvmulator.Opcodes.CHECKCAST;
+import static com.bandlem.jvm.jvmulator.Opcodes.DLOAD;
+import static com.bandlem.jvm.jvmulator.Opcodes.DSTORE;
+import static com.bandlem.jvm.jvmulator.Opcodes.FLOAD;
+import static com.bandlem.jvm.jvmulator.Opcodes.FSTORE;
+import static com.bandlem.jvm.jvmulator.Opcodes.GETFIELD;
+import static com.bandlem.jvm.jvmulator.Opcodes.GETSTATIC;
+import static com.bandlem.jvm.jvmulator.Opcodes.GOTO;
+import static com.bandlem.jvm.jvmulator.Opcodes.GOTO_W;
+import static com.bandlem.jvm.jvmulator.Opcodes.IFEQ;
+import static com.bandlem.jvm.jvmulator.Opcodes.IFGE;
+import static com.bandlem.jvm.jvmulator.Opcodes.IFGT;
+import static com.bandlem.jvm.jvmulator.Opcodes.IFLE;
+import static com.bandlem.jvm.jvmulator.Opcodes.IFLT;
+import static com.bandlem.jvm.jvmulator.Opcodes.IFNONNULL;
+import static com.bandlem.jvm.jvmulator.Opcodes.IFNULL;
+import static com.bandlem.jvm.jvmulator.Opcodes.IF_ACMPEQ;
+import static com.bandlem.jvm.jvmulator.Opcodes.IF_ACMPNE;
+import static com.bandlem.jvm.jvmulator.Opcodes.IF_ICMPEQ;
+import static com.bandlem.jvm.jvmulator.Opcodes.IF_ICMPGE;
+import static com.bandlem.jvm.jvmulator.Opcodes.IF_ICMPGT;
+import static com.bandlem.jvm.jvmulator.Opcodes.IF_ICMPLE;
+import static com.bandlem.jvm.jvmulator.Opcodes.IF_ICMPLT;
+import static com.bandlem.jvm.jvmulator.Opcodes.IF_ICMPNE;
+import static com.bandlem.jvm.jvmulator.Opcodes.IINC;
+import static com.bandlem.jvm.jvmulator.Opcodes.ILOAD;
+import static com.bandlem.jvm.jvmulator.Opcodes.INSTANCEOF;
+import static com.bandlem.jvm.jvmulator.Opcodes.INVOKEDYNAMIC;
+import static com.bandlem.jvm.jvmulator.Opcodes.INVOKEINTERFACE;
+import static com.bandlem.jvm.jvmulator.Opcodes.INVOKESPECIAL;
+import static com.bandlem.jvm.jvmulator.Opcodes.INVOKESTATIC;
+import static com.bandlem.jvm.jvmulator.Opcodes.INVOKEVIRTUAL;
+import static com.bandlem.jvm.jvmulator.Opcodes.ISTORE;
+import static com.bandlem.jvm.jvmulator.Opcodes.JSR;
+import static com.bandlem.jvm.jvmulator.Opcodes.JSR_W;
+import static com.bandlem.jvm.jvmulator.Opcodes.LDC;
+import static com.bandlem.jvm.jvmulator.Opcodes.LDC2_W;
+import static com.bandlem.jvm.jvmulator.Opcodes.LDC_W;
+import static com.bandlem.jvm.jvmulator.Opcodes.LLOAD;
+import static com.bandlem.jvm.jvmulator.Opcodes.LOOKUPSWITCH;
+import static com.bandlem.jvm.jvmulator.Opcodes.LSTORE;
+import static com.bandlem.jvm.jvmulator.Opcodes.MULTIANEWARRAY;
+import static com.bandlem.jvm.jvmulator.Opcodes.NEW;
+import static com.bandlem.jvm.jvmulator.Opcodes.NEWARRAY;
+import static com.bandlem.jvm.jvmulator.Opcodes.PUTFIELD;
+import static com.bandlem.jvm.jvmulator.Opcodes.PUTSTATIC;
+import static com.bandlem.jvm.jvmulator.Opcodes.RET;
+import static com.bandlem.jvm.jvmulator.Opcodes.SIPUSH;
+import static com.bandlem.jvm.jvmulator.Opcodes.TABLESWITCH;
+import static com.bandlem.jvm.jvmulator.Opcodes.WIDE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
@@ -220,6 +274,81 @@ class OpcodesTest {
 		assertEquals("impdep2", Opcodes.name((byte) 0xff));
 		for (byte b = (byte) 0xcb; b < (byte) 0xfe; b++) {
 			assertNull(Opcodes.name(b));
+		}
+	}
+	@Test
+	void testOpcodeOperands() {
+		for (int i = 0; i < 256; i++) {
+			final byte opcode = (byte) (i & 0xff);
+			int operands;
+			switch (opcode) {
+			case ALOAD:
+			case ASTORE:
+			case BIPUSH:
+			case DLOAD:
+			case DSTORE:
+			case FLOAD:
+			case FSTORE:
+			case ILOAD:
+			case ISTORE:
+			case LDC:
+			case LLOAD:
+			case LSTORE:
+			case NEWARRAY:
+			case RET:
+				operands = 1;
+				break;
+			case ANEWARRAY:
+			case CHECKCAST:
+			case GETFIELD:
+			case GETSTATIC:
+			case GOTO:
+			case IF_ACMPEQ:
+			case IF_ACMPNE:
+			case IF_ICMPEQ:
+			case IF_ICMPGE:
+			case IF_ICMPGT:
+			case IF_ICMPLE:
+			case IF_ICMPLT:
+			case IF_ICMPNE:
+			case IFEQ:
+			case IFGE:
+			case IFGT:
+			case IFLE:
+			case IFLT:
+			case IFNONNULL:
+			case IFNULL:
+			case IINC:
+			case INSTANCEOF:
+			case INVOKESPECIAL:
+			case INVOKESTATIC:
+			case INVOKEVIRTUAL:
+			case JSR:
+			case LDC_W:
+			case LDC2_W:
+			case NEW:
+			case PUTFIELD:
+			case PUTSTATIC:
+			case SIPUSH:
+				operands = 2;
+				break;
+			case MULTIANEWARRAY:
+				operands = 3;
+				break;
+			case GOTO_W:
+			case INVOKEDYNAMIC:
+			case INVOKEINTERFACE:
+			case JSR_W:
+				operands = 4;
+				break;
+			case WIDE:
+			case TABLESWITCH:
+			case LOOKUPSWITCH:
+				operands = -1;
+			default:
+				operands = 0;
+			}
+			assertEquals(operands, Opcodes.operands(opcode), "Opcode " + opcode);
 		}
 	}
 }

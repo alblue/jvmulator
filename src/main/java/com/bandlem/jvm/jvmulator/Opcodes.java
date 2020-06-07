@@ -474,4 +474,75 @@ public interface Opcodes {
 	public static String name(final byte i) {
 		return name[i & 0xff];
 	}
+	static int operands(final byte opcode) {
+		int operands;
+		switch (opcode) {
+		case ALOAD:
+		case ASTORE:
+		case BIPUSH:
+		case DLOAD:
+		case DSTORE:
+		case FLOAD:
+		case FSTORE:
+		case ILOAD:
+		case ISTORE:
+		case LDC:
+		case LLOAD:
+		case LSTORE:
+		case NEWARRAY:
+		case RET:
+			operands = 1;
+			break;
+		case ANEWARRAY:
+		case CHECKCAST:
+		case GETFIELD:
+		case GETSTATIC:
+		case GOTO:
+		case IF_ACMPEQ:
+		case IF_ACMPNE:
+		case IF_ICMPEQ:
+		case IF_ICMPGE:
+		case IF_ICMPGT:
+		case IF_ICMPLE:
+		case IF_ICMPLT:
+		case IF_ICMPNE:
+		case IFEQ:
+		case IFGE:
+		case IFGT:
+		case IFLE:
+		case IFLT:
+		case IFNONNULL:
+		case IFNULL:
+		case IINC:
+		case INSTANCEOF:
+		case INVOKESPECIAL:
+		case INVOKESTATIC:
+		case INVOKEVIRTUAL:
+		case JSR:
+		case LDC_W:
+		case LDC2_W:
+		case NEW:
+		case PUTFIELD:
+		case PUTSTATIC:
+		case SIPUSH:
+			operands = 2;
+			break;
+		case MULTIANEWARRAY:
+			operands = 3;
+			break;
+		case GOTO_W:
+		case INVOKEDYNAMIC:
+		case INVOKEINTERFACE:
+		case JSR_W:
+			operands = 4;
+			break;
+		case WIDE:
+		case TABLESWITCH:
+		case LOOKUPSWITCH:
+			operands = -1;
+		default:
+			operands = 0;
+		}
+		return operands;
+	}
 }
