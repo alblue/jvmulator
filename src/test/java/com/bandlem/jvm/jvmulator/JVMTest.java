@@ -23,6 +23,7 @@ import com.bandlem.jvm.jvmulator.classfile.ConstantPool.DoubleConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.FloatConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.IntConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.LongConstant;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.StringConstant;
 import com.bandlem.jvm.jvmulator.classfile.JavaClass;
 class JVMTest {
 	static byte[] constantData = {
@@ -87,7 +88,7 @@ class JVMTest {
 		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	private void expect(final Object result, final JavaClass javaClass, final int locals, final byte[] code) {
-		final JVMFrame frame = new JVMFrame(null, code, locals);
+		final JVMFrame frame = new JVMFrame(javaClass, code, locals);
 		final Slot slot = frame.run();
 		if (slot != null) {
 			assertEquals(result, slot.referenceValue());
@@ -281,10 +282,14 @@ class JVMTest {
 		final JavaClass javaClass = new JavaClass(new DataInputStream(new ByteArrayInputStream(constantData)));
 		final ConstantPool pool = javaClass.pool;
 		assertEquals("alex.blewitt@gmail.com", pool.getString(23));
+		assertEquals(23, ((StringConstant) pool.getItem(13)).index);
 		assertEquals(42, ((IntConstant) pool.getItem(6)).value);
 		assertEquals(37, ((LongConstant) pool.getItem(9)).value);
 		assertEquals(2.718F, ((FloatConstant) pool.getItem(20)).value);
 		assertEquals(3.141D, ((DoubleConstant) pool.getItem(16)).value);
+		expect("alex.blewitt@gmail.com", javaClass, 0, new byte[] {
+				LDC, 0x0d, ARETURN
+		});
 		expect(42, javaClass, 0, new byte[] {
 				LDC, 0x06, IRETURN
 		});

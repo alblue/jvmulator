@@ -7,11 +7,13 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 package com.bandlem.jvm.jvmulator;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.DoubleConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.FloatConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.IntConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.Item;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.LongConstant;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.StringConstant;
 import com.bandlem.jvm.jvmulator.classfile.JavaClass;
 public class JVMFrame {
 	private final byte[] bytecode;
@@ -44,8 +46,12 @@ public class JVMFrame {
 		return slot;
 	}
 	private void pushConstant(final int constant) {
-		final Item item = javaClass.pool.getItem(constant);
-		if (item instanceof IntConstant) {
+		final ConstantPool pool = javaClass.pool;
+		final Item item = pool.getItem(constant);
+		if (item instanceof StringConstant) {
+			final short index = ((StringConstant) item).index;
+			stack.push(pool.getString(index));
+		} else if (item instanceof IntConstant) {
 			stack.push(((IntConstant) item).value);
 		} else if (item instanceof LongConstant) {
 			stack.push(((LongConstant) item).value);
