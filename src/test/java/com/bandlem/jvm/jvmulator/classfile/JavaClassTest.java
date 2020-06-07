@@ -68,4 +68,11 @@ public class JavaClassTest {
 				() -> new JavaClass(dis((byte) 0xb0, (byte) 0x00, (byte) 0xb0, (byte) 0x00)));
 		assertThrows(IllegalArgumentException.class, () -> new JavaClass(dis()));
 	}
+	@Test
+	void testMember() {
+		assertNull(classUnderTest.getField("Missing field"));
+		assertNotNull(classUnderTest.getField("field"));
+		assertNull(classUnderTest.getMethod("Not present"));
+		assertNotNull(classUnderTest.getMethod("run"));
+	}
 }

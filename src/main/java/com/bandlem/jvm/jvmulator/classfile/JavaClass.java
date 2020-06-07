@@ -64,6 +64,22 @@ public class JavaClass {
 		}
 		return null;
 	}
+	public Field getField(final String name) {
+		for (final Field field : fields) {
+			if (name.equals(field.name)) {
+				return field;
+			}
+		}
+		return null;
+	}
+	public Method getMethod(final String name) {
+		for (final Method method : methods) {
+			if (name.equals(method.name)) {
+				return method;
+			}
+		}
+		return null;
+	}
 	private Attribute[] readAttributes(final DataInput di, final ConstantPool pool) throws IOException {
 		final Attribute[] attributes = new Attribute[di.readShort()];
 		for (int i = 0; i < attributes.length; i++) {
