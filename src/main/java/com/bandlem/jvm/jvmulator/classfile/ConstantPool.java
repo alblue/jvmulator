@@ -25,6 +25,10 @@ public class ConstantPool {
 			super(TYPE);
 			this.value = value;
 		}
+		@Override
+		public boolean isWide() {
+			return true;
+		}
 	}
 	public static class FieldRef extends Item {
 		public static final int TYPE = 9;
@@ -116,6 +120,9 @@ public class ConstantPool {
 		Item(final int type) {
 			this.type = type;
 		}
+		public boolean isWide() {
+			return false;
+		}
 		public String stringValue() {
 			throw new IllegalArgumentException("Wrong type");
 		}
@@ -126,6 +133,10 @@ public class ConstantPool {
 		LongConstant(final long value) {
 			super(TYPE);
 			this.value = value;
+		}
+		@Override
+		public boolean isWide() {
+			return true;
 		}
 	}
 	public static class MethodHandle extends Item {
@@ -207,6 +218,9 @@ public class ConstantPool {
 		items = new Item[size & 0xffff];
 		for (int i = 1; i < items.length; i++) {
 			items[i] = Item.read(di);
+			if (items[i].isWide()) {
+				i++;
+			}
 		}
 	}
 	public String getClassName(final int index) {
