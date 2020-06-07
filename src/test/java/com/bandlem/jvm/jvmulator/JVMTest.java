@@ -9,7 +9,11 @@
 package com.bandlem.jvm.jvmulator;
 import static com.bandlem.jvm.jvmulator.Opcodes.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.Test;
 class JVMTest {
@@ -43,6 +47,7 @@ class JVMTest {
 		if (slot != null) {
 			assertEquals(result, slot.referenceValue());
 		}
+		assertEquals(slot, frame.getReturnValue());
 		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	@Test
@@ -656,6 +661,20 @@ class JVMTest {
 		});
 	}
 	@Test
+	void testStep() {
+		final JVMFrame frame = new JVMFrame(new byte[] {
+				ICONST_1, IRETURN
+		}, 0);
+		assertEquals(0, frame.getPC());
+		assertNull(frame.getReturnValue());
+		assertTrue(frame.step());
+		assertEquals(1, frame.getPC());
+		assertNull(frame.getReturnValue());
+		assertFalse(frame.step());
+		assertEquals(2, frame.getPC());
+		assertNotNull(frame.getReturnValue());
+	}
+	@Test
 	void testSupportedBytecodes() {
 		// Contains the high water mark of implemented features
 		final int max = 256;
@@ -687,6 +706,7 @@ class JVMTest {
 						(byte) b
 				}, 0);
 				frame.step();
+				assertTrue(frame.getPC() > 0);
 			} catch (final Exception e) {
 				final String message = e.getMessage();
 				final boolean unsupported = message.startsWith("Unknown opcode:");
