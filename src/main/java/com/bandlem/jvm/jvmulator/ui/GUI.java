@@ -1,7 +1,11 @@
 package com.bandlem.jvm.jvmulator.ui;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.lang.reflect.Method;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -11,8 +15,9 @@ public class GUI extends JPanel {
 	private static final long serialVersionUID = 1L;
 	public static void main(final String[] args) {
 		final JFrame frame = new JFrame("JVMulator");
-		frame.add(new GUI());
-		frame.pack();
+		final GUI gui = new GUI();
+		frame.add(gui);
+		frame.setSize(gui.getMinimumSize());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
@@ -26,12 +31,16 @@ public class GUI extends JPanel {
 		final Font monospaced = new Font(Font.MONOSPACED, Font.PLAIN, 24);
 		if (monospaced != null) {
 			source.setFont(monospaced);
+			console.setFont(monospaced);
 		}
-		add(source);
-		add(new JButton(compile));
-		add(methods);
-		add(new JButton(invoke));
-		add(console);
+		source.setBorder(BorderFactory.createTitledBorder("Source"));
+		console.setBorder(BorderFactory.createTitledBorder("Console"));
+		setLayout(new GridBagLayout());
+		add(source, constraints(0, 0));
+		add(console, constraints(1, 0));
+		add(new JButton(compile), constraints(0, 1));
+		add(new JButton(invoke), constraints(1, 1));
+		add(methods, constraints(0, 2));
 		System.setOut(out);
 	}
 	public void addMethod(final Method method) {
@@ -44,6 +53,10 @@ public class GUI extends JPanel {
 	public void clearMethods() {
 		methods.removeAllItems();
 		enableButtons(false);
+	}
+	private GridBagConstraints constraints(final int x, final int y) {
+		return new GridBagConstraints(x, y, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+				new Insets(0, 0, 0, 0), 0, 0);
 	}
 	private void enableButtons(final boolean enabled) {
 		invoke.setEnabled(enabled);
