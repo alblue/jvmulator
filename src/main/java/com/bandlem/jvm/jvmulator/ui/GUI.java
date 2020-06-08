@@ -73,6 +73,7 @@ public class GUI extends JPanel {
 	}
 	private String getExample() {
 		return "public class Example {\n" //
+				+ "  public static void gc() { System.gc(); }\n" //
 				+ "  public static void sayHello() {\n" //
 				+ "    System.out.println(\"Hello World\");\n" //
 				+ "  }\n" //

@@ -26,6 +26,7 @@ public class SlotTest {
 	void testDoubleSlot() {
 		final Slot slot = doubleSlot;
 		assertEquals(4, slot.doubleValue());
+		assertEquals(4.0D, slot.toObject());
 		assertEquals("4.0", slot.toString());
 		assertTrue(slot.isWide());
 		assertThrows(ClassCastException.class, slot::intValue);
@@ -36,6 +37,7 @@ public class SlotTest {
 	void testEmptySlot() {
 		final Slot slot = empty;
 		assertEquals("---", slot.toString());
+		assertEquals(null, slot.toObject());
 		assertFalse(slot.isWide());
 		assertThrows(ClassCastException.class, slot::intValue);
 		assertThrows(ClassCastException.class, slot::longValue);
@@ -45,7 +47,8 @@ public class SlotTest {
 	@Test
 	void testFloatSlot() {
 		final Slot slot = floatSlot;
-		assertEquals(2, slot.floatValue());
+		assertEquals(2F, slot.floatValue());
+		assertEquals(2.0F, slot.toObject());
 		assertEquals("2.0", slot.toString());
 		assertFalse(slot.isWide());
 		assertThrows(ClassCastException.class, slot::intValue);
@@ -56,6 +59,7 @@ public class SlotTest {
 	void testIntSlot() {
 		final Slot slot = intSlot;
 		assertEquals(1, slot.intValue());
+		assertEquals(1, slot.toObject());
 		assertEquals("1", slot.toString());
 		assertFalse(slot.isWide());
 		assertThrows(ClassCastException.class, slot::longValue);
@@ -65,7 +69,8 @@ public class SlotTest {
 	@Test
 	void testLongSlot() {
 		final Slot slot = longSlot;
-		assertEquals(3, slot.longValue());
+		assertEquals(3L, slot.longValue());
+		assertEquals(3L, slot.toObject());
 		assertEquals("3", slot.toString());
 		assertTrue(slot.isWide());
 		assertThrows(ClassCastException.class, slot::intValue);
@@ -77,6 +82,7 @@ public class SlotTest {
 		final Slot slot = Slot.of("Hello World");
 		assertEquals("Hello World", slot.referenceValue());
 		assertEquals("Hello World", slot.toString());
+		assertEquals("Hello World", slot.toObject());
 		assertNull(Slot.of(null).referenceValue());
 		assertThrows(IllegalStateException.class, SlotTest::wrapSlotInSlot);
 	}

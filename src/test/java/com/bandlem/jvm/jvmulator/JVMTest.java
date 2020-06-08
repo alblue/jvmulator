@@ -8,6 +8,7 @@
  */
 package com.bandlem.jvm.jvmulator;
 import static com.bandlem.jvm.jvmulator.Opcodes.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -17,78 +18,65 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.util.Base64;
 import org.junit.jupiter.api.Test;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.DoubleConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.FloatConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.IntConstant;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.Item;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.LongConstant;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.MethodRef;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.StringConstant;
 import com.bandlem.jvm.jvmulator.classfile.JavaClass;
 class JVMTest {
-	static byte[] constantData = {
-			(byte) 0xca, (byte) 0xfe, (byte) 0xba, (byte) 0xbe, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x37,
-			(byte) 0x00, (byte) 0x18, (byte) 0x07, (byte) 0x00, (byte) 0x15, (byte) 0x07, (byte) 0x00, (byte) 0x16,
-			(byte) 0x01, (byte) 0x00, (byte) 0x01, (byte) 0x69, (byte) 0x01, (byte) 0x00, (byte) 0x01, (byte) 0x49,
-			(byte) 0x01, (byte) 0x00, (byte) 0x0d, (byte) 0x43, (byte) 0x6f, (byte) 0x6e, (byte) 0x73, (byte) 0x74,
-			(byte) 0x61, (byte) 0x6e, (byte) 0x74, (byte) 0x56, (byte) 0x61, (byte) 0x6c, (byte) 0x75, (byte) 0x65,
-			(byte) 0x03, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x2a, (byte) 0x01, (byte) 0x00, (byte) 0x01,
-			(byte) 0x6c, (byte) 0x01, (byte) 0x00, (byte) 0x01, (byte) 0x4a, (byte) 0x05, (byte) 0x00, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x25, (byte) 0x01, (byte) 0x00,
-			(byte) 0x01, (byte) 0x73, (byte) 0x01, (byte) 0x00, (byte) 0x12, (byte) 0x4c, (byte) 0x6a, (byte) 0x61,
-			(byte) 0x76, (byte) 0x61, (byte) 0x2f, (byte) 0x6c, (byte) 0x61, (byte) 0x6e, (byte) 0x67, (byte) 0x2f,
-			(byte) 0x53, (byte) 0x74, (byte) 0x72, (byte) 0x69, (byte) 0x6e, (byte) 0x67, (byte) 0x3b, (byte) 0x08,
-			(byte) 0x00, (byte) 0x17, (byte) 0x01, (byte) 0x00, (byte) 0x01, (byte) 0x64, (byte) 0x01, (byte) 0x00,
-			(byte) 0x01, (byte) 0x44, (byte) 0x06, (byte) 0x40, (byte) 0x09, (byte) 0x20, (byte) 0xc4, (byte) 0x9b,
-			(byte) 0xa5, (byte) 0xe3, (byte) 0x54, (byte) 0x01, (byte) 0x00, (byte) 0x01, (byte) 0x66, (byte) 0x01,
-			(byte) 0x00, (byte) 0x01, (byte) 0x46, (byte) 0x04, (byte) 0x40, (byte) 0x2d, (byte) 0xf3, (byte) 0xb6,
-			(byte) 0x01, (byte) 0x00, (byte) 0x04, (byte) 0x54, (byte) 0x65, (byte) 0x73, (byte) 0x74, (byte) 0x01,
-			(byte) 0x00, (byte) 0x10, (byte) 0x6a, (byte) 0x61, (byte) 0x76, (byte) 0x61, (byte) 0x2f, (byte) 0x6c,
-			(byte) 0x61, (byte) 0x6e, (byte) 0x67, (byte) 0x2f, (byte) 0x4f, (byte) 0x62, (byte) 0x6a, (byte) 0x65,
-			(byte) 0x63, (byte) 0x74, (byte) 0x01, (byte) 0x00, (byte) 0x16, (byte) 0x61, (byte) 0x6c, (byte) 0x65,
-			(byte) 0x78, (byte) 0x2e, (byte) 0x62, (byte) 0x6c, (byte) 0x65, (byte) 0x77, (byte) 0x69, (byte) 0x74,
-			(byte) 0x74, (byte) 0x40, (byte) 0x67, (byte) 0x6d, (byte) 0x61, (byte) 0x69, (byte) 0x6c, (byte) 0x2e,
-			(byte) 0x63, (byte) 0x6f, (byte) 0x6d, (byte) 0x06, (byte) 0x01, (byte) 0x00, (byte) 0x01, (byte) 0x00,
-			(byte) 0x02, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x05, (byte) 0x00, (byte) 0x19, (byte) 0x00,
-			(byte) 0x03, (byte) 0x00, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x05, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x02, (byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x19, (byte) 0x00,
-			(byte) 0x07, (byte) 0x00, (byte) 0x08, (byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x05, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x02, (byte) 0x00, (byte) 0x09, (byte) 0x00, (byte) 0x19, (byte) 0x00,
-			(byte) 0x0b, (byte) 0x00, (byte) 0x0c, (byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x05, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x02, (byte) 0x00, (byte) 0x0d, (byte) 0x00, (byte) 0x19, (byte) 0x00,
-			(byte) 0x0e, (byte) 0x00, (byte) 0x0f, (byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x05, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x02, (byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x19, (byte) 0x00,
-			(byte) 0x12, (byte) 0x00, (byte) 0x13, (byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x05, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x02, (byte) 0x00, (byte) 0x14, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-			(byte) 0x00
-	};
+	public interface Example {
+		double d = 3.141;
+		float f = 2.718f;
+		int i = 42;
+		long l = 37L;
+		String s = "alex.blewitt@gmail.com";
+		default double foo() {
+			System.gc();
+			return Math.random();
+		}
+	}
+	static class InvokeDirect {
+		public float floaty() {
+			return 3.141f;
+		}
+		public long longy() {
+			return 42L;
+		}
+	}
+	private static final String constantData = "yv66vgAAADcAJgoAGgAbCgAcAB0HAB4HAB8BAAFpAQABSQEADUNvbnN0YW50VmFsdWUDAAAAKgEAAWwBAAFKBQAAAAAAAAAlAQABcwEAEkxqYXZhL2xhbmcvU3RyaW5nOwgAIAEAAWQBAAFEBkAJIMSbpeNUAQABZgEAAUYEQC3ztgEAA2ZvbwEAAygpRAEABENvZGUHACEMACIAIwcAJAwAJQAYAQAEVGVzdAEAEGphdmEvbGFuZy9PYmplY3QBABZhbGV4LmJsZXdpdHRAZ21haWwuY29tAQAQamF2YS9sYW5nL1N5c3RlbQEAAmdjAQADKClWAQAOamF2YS9sYW5nL01hdGgBAAZyYW5kb20GAQADAAQAAAAFABkABQAGAAEABwAAAAIACAAZAAkACgABAAcAAAACAAsAGQANAA4AAQAHAAAAAgAPABkAEAARAAEABwAAAAIAEgAZABQAFQABAAcAAAACABYAAQABABcAGAABABkAAAATAAIAAQAAAAe4AAG4AAKvAAAAAAAA";
 	private void expect(final Class<? extends Throwable> expected, final JavaClass javaClass, final int locals,
 			final byte[] code) {
-		final JVMFrame frame = new JVMFrame(javaClass, code, locals);
+		final JVMFrame frame = new JVMFrame(javaClass, locals, code);
 		assertThrows(expected, frame::run);
 	}
 	private void expect(final double result, final JavaClass javaClass, final int locals, final byte[] code) {
-		final JVMFrame frame = new JVMFrame(javaClass, code, locals);
+		final JVMFrame frame = new JVMFrame(javaClass, locals, code);
 		assertEquals(result, frame.run().doubleValue());
 		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	private void expect(final float result, final JavaClass javaClass, final int locals, final byte[] code) {
-		final JVMFrame frame = new JVMFrame(javaClass, code, locals);
+		final JVMFrame frame = new JVMFrame(javaClass, locals, code);
 		assertEquals(result, frame.run().floatValue());
 		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	private void expect(final int result, final JavaClass javaClass, final int locals, final byte[] code) {
-		final JVMFrame frame = new JVMFrame(javaClass, code, locals);
+		final JVMFrame frame = new JVMFrame(javaClass, locals, code);
 		assertEquals(result, frame.run().intValue());
 		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	private void expect(final long result, final JavaClass javaClass, final int locals, final byte[] code) {
-		final JVMFrame frame = new JVMFrame(javaClass, code, locals);
+		final JVMFrame frame = new JVMFrame(javaClass, locals, code);
 		assertEquals(result, frame.run().longValue());
 		assertThrows(IndexOutOfBoundsException.class, frame.stack::peek);
 	}
 	private void expect(final Object result, final JavaClass javaClass, final int locals, final byte[] code) {
-		final JVMFrame frame = new JVMFrame(javaClass, code, locals);
+		final JVMFrame frame = new JVMFrame(javaClass, locals, code);
 		final Slot slot = frame.run();
 		if (slot != null) {
 			assertEquals(result, slot.referenceValue());
@@ -278,29 +266,30 @@ class JVMTest {
 	}
 	@Test
 	void testConstantData() {
-		assertEquals(265, constantData.length);
-		final JavaClass javaClass = new JavaClass(new DataInputStream(new ByteArrayInputStream(constantData)));
+		final byte[] bytes = Base64.getDecoder().decode(constantData);
+		assertEquals(399, bytes.length);
+		final JavaClass javaClass = new JavaClass(new DataInputStream(new ByteArrayInputStream(bytes)));
 		final ConstantPool pool = javaClass.pool;
-		assertEquals("alex.blewitt@gmail.com", pool.getString(23));
-		assertEquals(23, ((StringConstant) pool.getItem(13)).index);
-		assertEquals(42, ((IntConstant) pool.getItem(6)).value);
-		assertEquals(37, ((LongConstant) pool.getItem(9)).value);
-		assertEquals(2.718F, ((FloatConstant) pool.getItem(20)).value);
-		assertEquals(3.141D, ((DoubleConstant) pool.getItem(16)).value);
+		assertEquals("alex.blewitt@gmail.com", pool.getString(32));
+		assertEquals(32, ((StringConstant) pool.getItem(15)).index);
+		assertEquals(42, ((IntConstant) pool.getItem(8)).value);
+		assertEquals(37, ((LongConstant) pool.getItem(11)).value);
+		assertEquals(2.718F, ((FloatConstant) pool.getItem(22)).value);
+		assertEquals(3.141D, ((DoubleConstant) pool.getItem(18)).value);
 		expect("alex.blewitt@gmail.com", javaClass, 0, new byte[] {
-				LDC, 0x0d, ARETURN
+				LDC, 0x0f, ARETURN
 		});
 		expect(42, javaClass, 0, new byte[] {
-				LDC, 0x06, IRETURN
+				LDC, 0x08, IRETURN
 		});
 		expect(37L, javaClass, 0, new byte[] {
-				LDC2_W, 0x00, 0x09, LRETURN
+				LDC2_W, 0x00, 0x0b, LRETURN
 		});
 		expect(2.718F, javaClass, 0, new byte[] {
-				LDC_W, 0x00, 0x14, FRETURN
+				LDC_W, 0x00, 0x16, FRETURN
 		});
 		expect(3.141D, javaClass, 0, new byte[] {
-				LDC2_W, 0x00, 0x10, DRETURN
+				LDC2_W, 0x00, 0x12, DRETURN
 		});
 		expect(UnsupportedOperationException.class, javaClass, 0, new byte[] {
 				LDC, 0x01, IRETURN
@@ -362,6 +351,22 @@ class JVMTest {
 		expect(1F, null, 0, new byte[] {
 				DCONST_1, D2F, FRETURN
 		});
+	}
+	@Test
+	void testDescriptor() throws ClassNotFoundException {
+		final Class<?>[] types = JVMFrame.argumentTypes("(ZSCIJFDLjava/lang/String;Z)V", getClass().getClassLoader());
+		assertEquals(9, types.length);
+		assertEquals(Boolean.TYPE, types[0]);
+		assertEquals(Short.TYPE, types[1]);
+		assertEquals(Character.TYPE, types[2]);
+		assertEquals(Integer.TYPE, types[3]);
+		assertEquals(Long.TYPE, types[4]);
+		assertEquals(Float.TYPE, types[5]);
+		assertEquals(Double.TYPE, types[6]);
+		assertEquals(String.class, types[7]);
+		assertEquals(Boolean.TYPE, types[8]);
+		assertThrows(IllegalArgumentException.class, () -> JVMFrame.argumentTypes("(?)V", null));
+		assertThrows(IllegalStateException.class, () -> JVMFrame.argumentTypes("(I", null));
 	}
 	@Test
 	void testDouble() {
@@ -576,6 +581,56 @@ class JVMTest {
 		});
 	}
 	@Test
+	void testInvoke() {
+		final byte[] bytes = Base64.getDecoder().decode(constantData);
+		assertEquals(399, bytes.length);
+		final JavaClass javaClass = new JavaClass(new DataInputStream(new ByteArrayInputStream(bytes)));
+		final ConstantPool pool = javaClass.pool;
+		final Item item = pool.getItem(1);
+		assertTrue(item instanceof MethodRef);
+		assertNotNull(new JVMFrame(javaClass, 0, new byte[] {
+				INVOKESTATIC, 0x00, 0x02, DRETURN
+		}).run());
+		assertNull(new JVMFrame(javaClass, 0, new byte[] {
+				ACONST_NULL, INVOKEVIRTUAL, 0x00, 0x01, RETURN
+		}).run());
+	}
+	@Test
+	void testInvokeDirect() {
+		final byte[] bytes = Base64.getDecoder().decode(constantData);
+		final JavaClass javaClass = new JavaClass(new DataInputStream(new ByteArrayInputStream(bytes)));
+		final ConstantPool pool = javaClass.pool;
+		final Item item = pool.getItem(1);
+		assertTrue(item instanceof MethodRef);
+		final JVMFrame frame = new JVMFrame(javaClass, 0, new byte[] {
+				INVOKESTATIC, 0x00, 0x01, RETURN
+		});
+		final ClassLoader classLoader = getClass().getClassLoader();
+		final Slot resultInt = frame.invoke("alex", "length", "()I", String.class.getName(), classLoader);
+		assertNotNull(resultInt);
+		assertDoesNotThrow(resultInt::intValue);
+		final Slot resultLong = frame.invoke(new InvokeDirect(), "longy", "()J", InvokeDirect.class.getName(),
+				classLoader);
+		assertNotNull(resultLong);
+		assertDoesNotThrow(resultLong::longValue);
+		final Slot resultFloat = frame.invoke(new InvokeDirect(), "floaty", "()F", InvokeDirect.class.getName(),
+				classLoader);
+		assertNotNull(resultFloat);
+		assertDoesNotThrow(resultFloat::floatValue);
+		final Slot resultDouble = frame.invoke(null, "random", "()D", Math.class.getName(), classLoader);
+		assertNotNull(resultDouble);
+		assertDoesNotThrow(resultDouble::doubleValue);
+		final Slot stringSlot = frame.invoke("alex", "toUpperCase", "()Ljava/lang/String;", String.class.getName(),
+				classLoader);
+		assertNotNull(stringSlot);
+		assertEquals("ALEX", stringSlot.toObject());
+		assertThrows(UnsupportedOperationException.class,
+				() -> frame.invoke("alex", "toSnakeCase", "()Ljava/lang/String;", String.class.getName(), classLoader));
+		frame.stack.push(123);
+		final Slot negatedSlot = frame.invoke(null, "negateExact", "(I)I", Math.class.getName(), classLoader);
+		assertEquals(-123, negatedSlot.intValue());
+	}
+	@Test
 	void testJSR() {
 		expect(3, null, 2, new byte[] {
 				ICONST_3, JSR, 0x00, 0x04, IRETURN, ASTORE_1, RET, 0x01
@@ -583,9 +638,6 @@ class JVMTest {
 		expect(2, null, 2, new byte[] {
 				ICONST_2, JSR_W, 0x00, 0x00, 0x00, 0x06, IRETURN, ASTORE_0, RET, 0x00
 		});
-	}
-	@Test
-	void testLoadConstants() {
 	}
 	@Test
 	void testLocals() {
@@ -741,9 +793,9 @@ class JVMTest {
 	}
 	@Test
 	void testStep() {
-		final JVMFrame frame = new JVMFrame(null, new byte[] {
+		final JVMFrame frame = new JVMFrame(null, 0, new byte[] {
 				ICONST_1, IRETURN
-		}, 0);
+		});
 		assertEquals(0, frame.getLocals().length);
 		assertEquals(0, frame.getStack().size());
 		assertEquals(0, frame.getPC());
@@ -782,9 +834,9 @@ class JVMTest {
 			if (name.equals("wide"))
 				continue;
 			try {
-				final JVMFrame frame = new JVMFrame(null, new byte[] {
+				final JVMFrame frame = new JVMFrame(null, 0, new byte[] {
 						(byte) b
-				}, 0);
+				});
 				frame.step();
 				assertTrue(frame.getPC() > 0);
 			} catch (final Exception e) {

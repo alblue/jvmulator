@@ -7,25 +7,79 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 package com.bandlem.jvm.jvmulator;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.DoubleConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.FloatConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.IntConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.Item;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.LongConstant;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.MethodRef;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.NameAndType;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.StringConstant;
 import com.bandlem.jvm.jvmulator.classfile.JavaClass;
 public class JVMFrame {
+	static Class<?>[] argumentTypes(final String descriptor, final ClassLoader loader) throws ClassNotFoundException {
+		final byte[] bytes = descriptor.getBytes();
+		final List<Class<?>> types = new ArrayList<>();
+		for (int i = 0; i < bytes.length; i++) {
+			switch (bytes[i]) {
+			case '(':
+				continue;
+			case ')':
+				return types.toArray(new Class[0]);
+			case 'Z':
+				types.add(Boolean.TYPE);
+				break;
+			case 'S':
+				types.add(Short.TYPE);
+				break;
+			case 'C':
+				types.add(Character.TYPE);
+				break;
+			case 'I':
+				types.add(Integer.TYPE);
+				break;
+			case 'J':
+				types.add(Long.TYPE);
+				break;
+			case 'F':
+				types.add(Float.TYPE);
+				break;
+			case 'D':
+				types.add(Double.TYPE);
+				break;
+			case 'L':
+				final int start = i + 1;
+				// Converts java/lang/String to java.lang.String
+				while (bytes[i] != ';') {
+					if (bytes[i] == '/')
+						bytes[i] = '.';
+					i++;
+				}
+				final String clazz = new String(bytes, start, i - start);
+				types.add(loader.loadClass(clazz));
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown type " + (char) bytes[i]);
+			}
+		}
+		throw new IllegalStateException("Read to end of " + descriptor + " without closing )");
+	}
 	private final byte[] bytecode;
-	private final JavaClass javaClass;
+	// private final JavaClass javaClass;
 	private final Slot[] locals;
 	private int pc;
+	private final ConstantPool pool;
 	private Slot returnValue;
 	final Stack stack = new Stack();
-	public JVMFrame(final JavaClass javaClass, final byte[] code, final int locals) {
+	public JVMFrame(final JavaClass javaClass, final int locals, final byte[] code) {
 		this.bytecode = code;
 		this.locals = new Slot[locals];
-		this.javaClass = javaClass;
+		// this.javaClass = javaClass;
+		this.pool = javaClass == null ? null : javaClass.pool;
 	}
 	public Slot[] getLocals() {
 		return locals;
@@ -39,6 +93,51 @@ public class JVMFrame {
 	public Stack getStack() {
 		return stack;
 	}
+	private void invoke(final Object target, final int index) {
+		final MethodRef methodRef = (MethodRef) pool.getItem(index);
+		final NameAndType nat = (NameAndType) pool.getItem(methodRef.nameAndTypeIndex);
+		final String methodName = pool.getString(nat.nameIndex);
+		final String descriptor = pool.getString(nat.descriptorIndex);
+		final String className = pool.getClassName(methodRef.classIndex);
+		final Slot result = invoke(target, methodName, descriptor, className, JVMFrame.class.getClassLoader());
+		if (result != null) {
+			stack.pushSlot(result);
+		}
+	}
+	Slot invoke(final Object target, final String methodName, final String descriptor, final String className,
+			final ClassLoader classLoader) {
+		try {
+			final Class<?> clazz = Class.forName(className.replace('/', '.'));
+			final Class<?> types[] = argumentTypes(descriptor, classLoader);
+			final Method method = clazz.getMethod(methodName, types);
+			final Object args[] = new Object[types.length];
+			for (int i = args.length - 1; i >= 0; i--) {
+				args[i] = stack.pop().toObject();
+			}
+			final Object result = method.invoke(target, args);
+			final char last = descriptor.charAt(descriptor.length() - 1);
+			switch (last) {
+			case 'V':
+				// no push
+				return null;
+			case 'I':
+			case 'S':
+			case 'C':
+			case 'Z':
+				return Slot.of((int) result);
+			case 'J':
+				return Slot.of((long) result);
+			case 'F':
+				return Slot.of((float) result);
+			case 'D':
+				return Slot.of((double) result);
+			default:
+				return Slot.of(result);
+			}
+		} catch (final Exception e) {
+			throw new UnsupportedOperationException("Cannot execute method " + className + ":" + methodName, e);
+		}
+	}
 	private Slot notWide(final Slot slot, final byte opcode) {
 		if (slot.isWide()) {
 			throw new IllegalStateException("Cannot use wide slot for opcode " + opcode);
@@ -46,7 +145,6 @@ public class JVMFrame {
 		return slot;
 	}
 	private void pushConstant(final int constant) {
-		final ConstantPool pool = javaClass.pool;
 		final Item item = pool.getItem(constant);
 		if (item instanceof StringConstant) {
 			final short index = ((StringConstant) item).index;
@@ -848,6 +946,15 @@ public class JVMFrame {
 		case Opcodes.LDC2_W:
 			pushConstant((bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
 			return true;
+		// Invoke
+		case Opcodes.INVOKESTATIC: {
+			invoke(null, (bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
+			return true;
+		}
+		case Opcodes.INVOKEVIRTUAL: {
+			invoke(stack.popReference(), (bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
+			return true;
+		}
 		// Miscellaneous
 		case Opcodes.IMPDEP1:
 			// Fallthrough

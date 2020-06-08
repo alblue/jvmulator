@@ -13,6 +13,10 @@ public abstract class Slot {
 			super(value, true);
 		}
 		@Override
+		protected Object toObject() {
+			return value;
+		}
+		@Override
 		public String toString() {
 			return String.valueOf(value);
 		}
@@ -110,5 +114,8 @@ public abstract class Slot {
 		// The code could be changed to 'return this.value' but then
 		// the code wouldn't correctly check that it is a ReferenceSlot type
 		return ((ReferenceSlot) this).value;
+	}
+	protected Object toObject() {
+		return value;
 	}
 }

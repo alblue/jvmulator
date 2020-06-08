@@ -87,7 +87,7 @@ public class JVMulator extends JPanel {
 		} else {
 			final Code codeAttribute = method.getCodeAttribute();
 			code = codeAttribute.getBytecode();
-			frame = new JVMFrame(javaClass, code, codeAttribute.getMaxLocals());
+			frame = new JVMFrame(javaClass, codeAttribute.getMaxLocals(), code);
 			displayCode();
 			displayLocals();
 			displayStack();
