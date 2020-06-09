@@ -7,11 +7,13 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 package com.bandlem.jvm.jvmulator;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.DoubleConstant;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.FieldRef;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.FloatConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.IntConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.Item;
@@ -68,12 +70,76 @@ public class JVMFrame {
 		}
 		throw new IllegalStateException("Read to end of " + descriptor + " without closing )");
 	}
+	static Slot getfield(final Object target, final String fieldName, final String descriptor, final String className,
+			final ClassLoader classLoader) {
+		try {
+			final Class<?> clazz = Class.forName(className.replace('/', '.'));
+			final Field field = clazz.getField(fieldName);
+			final Object result = field.get(target);
+			switch (descriptor.charAt(descriptor.length() - 1)) {
+			case 'Z':
+			case 'B':
+			case 'S':
+			case 'C':
+			case 'I':
+				return Slot.of((int) result);
+			case 'J':
+				return Slot.of((long) result);
+			case 'F':
+				return Slot.of((float) result);
+			case 'D':
+				return Slot.of((double) result);
+			default:
+				return Slot.of(result);
+			}
+		} catch (final Exception e) {
+			throw new UnsupportedOperationException("Cannot access field " + className + ":" + fieldName, e);
+		}
+	}
 	static boolean instanceOf(final Object target, final String className) {
 		try {
 			final Class<?> clazz = Class.forName(className.replace('/', '.'));
 			return clazz.isAssignableFrom(target.getClass());
 		} catch (final Exception e) {
 			throw new UnsupportedOperationException("Cannot instanceof " + className + " on " + target, e);
+		}
+	}
+	static void putfield(final Slot value, final Object target, final String fieldName, final String descriptor,
+			final String className, final ClassLoader classLoader) {
+		try {
+			final Class<?> clazz = Class.forName(className.replace('/', '.'));
+			final Field field = clazz.getField(fieldName);
+			switch (descriptor.charAt(descriptor.length() - 1)) {
+			case 'Z':
+				field.setBoolean(target, value.booleanValue());
+				return;
+			case 'B':
+				field.setByte(target, (byte) value.intValue());
+				return;
+			case 'S':
+				field.setShort(target, (short) value.intValue());
+				return;
+			case 'C':
+				field.setChar(target, (char) value.intValue());
+				return;
+			case 'I':
+				field.setInt(target, value.intValue());
+				return;
+			case 'J':
+				field.setLong(target, value.longValue());
+				return;
+			case 'F':
+				field.setFloat(target, value.floatValue());
+				return;
+			case 'D':
+				field.setDouble(target, value.doubleValue());
+				return;
+			default:
+				field.set(target, value.referenceValue());
+				return;
+			}
+		} catch (final Exception e) {
+			throw new UnsupportedOperationException("Cannot access field " + className + ":" + fieldName, e);
 		}
 	}
 	private final byte[] bytecode;
@@ -88,6 +154,15 @@ public class JVMFrame {
 		this.locals = new Slot[locals];
 		// this.javaClass = javaClass;
 		this.pool = javaClass == null ? null : javaClass.pool;
+	}
+	private void getfield(final Object target, final int index) {
+		final FieldRef fieldRef = (FieldRef) pool.getItem(index);
+		final NameAndType nat = (NameAndType) pool.getItem(fieldRef.nameAndTypeIndex);
+		final String fieldName = pool.getString(nat.nameIndex);
+		final String descriptor = pool.getString(nat.descriptorIndex);
+		final String className = pool.getClassName(fieldRef.classIndex);
+		final Slot result = getfield(target, fieldName, descriptor, className, JVMFrame.class.getClassLoader());
+		stack.pushSlot(result);
 	}
 	public Slot[] getLocals() {
 		return locals;
@@ -168,6 +243,14 @@ public class JVMFrame {
 		} else {
 			throw new UnsupportedOperationException("Unknown item type " + item.type);
 		}
+	}
+	private void putfield(final Slot value, final Object target, final int index) {
+		final FieldRef fieldRef = (FieldRef) pool.getItem(index);
+		final NameAndType nat = (NameAndType) pool.getItem(fieldRef.nameAndTypeIndex);
+		final String fieldName = pool.getString(nat.nameIndex);
+		final String descriptor = pool.getString(nat.descriptorIndex);
+		final String className = pool.getClassName(fieldRef.classIndex);
+		putfield(value, target, fieldName, descriptor, className, JVMFrame.class.getClassLoader());
 	}
 	public Slot run() {
 		returnValue = null;
@@ -972,6 +1055,23 @@ public class JVMFrame {
 		}
 		case Opcodes.INVOKEVIRTUAL: {
 			invoke(stack.popReference(), (bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
+			return true;
+		}
+		// Field accessors
+		case Opcodes.GETSTATIC: {
+			getfield(null, (bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
+			return true;
+		}
+		case Opcodes.PUTSTATIC: {
+			putfield(stack.pop(), null, (bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
+			return true;
+		}
+		case Opcodes.GETFIELD: {
+			getfield(stack.popReference(), (bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
+			return true;
+		}
+		case Opcodes.PUTFIELD: {
+			putfield(stack.pop(), stack.popReference(), (bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
 			return true;
 		}
 		// Miscellaneous
