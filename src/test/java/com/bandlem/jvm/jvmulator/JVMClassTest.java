@@ -389,7 +389,7 @@ class JVMClassTest {
 				INVOKESTATIC, 0x00, constant_random, DRETURN
 		}).run());
 		assertNull(new JVMFrame(javaClass, 0, new byte[] {
-				ACONST_NULL, INVOKEVIRTUAL, 0x00, constant_gc, RETURN
+				INVOKEVIRTUAL, 0x00, constant_gc, RETURN
 		}).run());
 	}
 	@Test
@@ -398,26 +398,30 @@ class JVMClassTest {
 				RETURN
 		});
 		final ClassLoader classLoader = getClass().getClassLoader();
-		final Slot resultInt = frame.invoke("alex", "length", "()I", String.class.getName(), classLoader);
+		frame.stack.push("Hello World");
+		final Slot resultInt = frame.invoke("length", "()I", String.class.getName(), classLoader);
 		assertNotNull(resultInt);
 		assertDoesNotThrow(resultInt::intValue);
-		final Slot resultLong = frame.invoke(new Sample(), "longy", "()J", Sample.class.getName(), classLoader);
+		frame.stack.push(new Sample());
+		final Slot resultLong = frame.invoke("longy", "()J", Sample.class.getName(), classLoader);
 		assertNotNull(resultLong);
 		assertDoesNotThrow(resultLong::longValue);
-		final Slot resultFloat = frame.invoke(new Sample(), "floaty", "()F", Sample.class.getName(), classLoader);
+		frame.stack.push(new Sample());
+		final Slot resultFloat = frame.invoke("floaty", "()F", Sample.class.getName(), classLoader);
 		assertNotNull(resultFloat);
 		assertDoesNotThrow(resultFloat::floatValue);
-		final Slot resultDouble = frame.invoke(null, "random", "()D", Math.class.getName(), classLoader);
+		final Slot resultDouble = frame.invoke("random", "()D", Math.class.getName(), classLoader);
 		assertNotNull(resultDouble);
 		assertDoesNotThrow(resultDouble::doubleValue);
-		final Slot stringSlot = frame.invoke("alex", "toUpperCase", "()Ljava/lang/String;", String.class.getName(),
+		frame.stack.push("Alex");
+		final Slot stringSlot = frame.invoke("toUpperCase", "()Ljava/lang/String;", String.class.getName(),
 				classLoader);
 		assertNotNull(stringSlot);
 		assertEquals("ALEX", stringSlot.toObject());
 		assertThrows(UnsupportedOperationException.class,
-				() -> frame.invoke("alex", "toSnakeCase", "()Ljava/lang/String;", String.class.getName(), classLoader));
+				() -> frame.invoke("toSnakeCase", "()Ljava/lang/String;", String.class.getName(), classLoader));
 		frame.stack.push(123);
-		final Slot negatedSlot = frame.invoke(null, "negateExact", "(I)I", Math.class.getName(), classLoader);
+		final Slot negatedSlot = frame.invoke("negateExact", "(I)I", Math.class.getName(), classLoader);
 		assertEquals(-123, negatedSlot.intValue());
 	}
 	@Test

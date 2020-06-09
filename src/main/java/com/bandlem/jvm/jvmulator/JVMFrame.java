@@ -9,6 +9,7 @@
 package com.bandlem.jvm.jvmulator;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.DoubleConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.FieldRef;
@@ -128,27 +129,29 @@ public class JVMFrame {
 	public Stack getStack() {
 		return stack;
 	}
-	private void invoke(final Object target, final int index) {
+	private void invoke(final int index) {
 		final MethodRef methodRef = (MethodRef) pool.getItem(index);
 		final NameAndType nat = (NameAndType) pool.getItem(methodRef.nameAndTypeIndex);
 		final String methodName = pool.getString(nat.nameIndex);
 		final String descriptor = pool.getString(nat.descriptorIndex);
 		final String className = pool.getClassName(methodRef.classIndex);
-		final Slot result = invoke(target, methodName, descriptor, className, JVMFrame.class.getClassLoader());
+		final Slot result = invoke(methodName, descriptor, className, JVMFrame.class.getClassLoader());
 		if (result != null) {
 			stack.pushSlot(result);
 		}
 	}
-	Slot invoke(final Object target, final String methodName, final String descriptor, final String className,
+	Slot invoke(final String methodName, final String descriptor, final String className,
 			final ClassLoader classLoader) {
 		try {
 			final Class<?> clazz = Class.forName(className.replace('/', '.'));
 			final Class<?> types[] = Member.Method.argumentTypes(descriptor, classLoader);
 			final Method method = clazz.getMethod(methodName, types);
+			final boolean isStatic = 0 != (method.getModifiers() & Modifier.STATIC);
 			final Object args[] = new Object[types.length];
 			for (int i = args.length - 1; i >= 0; i--) {
 				args[i] = stack.pop().toObject();
 			}
+			final Object target = isStatic ? null : stack.pop().toObject();
 			final Object result = method.invoke(target, args);
 			final char last = descriptor.charAt(descriptor.length() - 1);
 			switch (last) {
@@ -1002,11 +1005,11 @@ public class JVMFrame {
 		}
 		// Invoke
 		case Opcodes.INVOKESTATIC: {
-			invoke(null, (bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
+			invoke((bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
 			return true;
 		}
 		case Opcodes.INVOKEVIRTUAL: {
-			invoke(stack.popReference(), (bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
+			invoke((bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
 			return true;
 		}
 		// Field accessors
