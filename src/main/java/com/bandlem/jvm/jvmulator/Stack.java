@@ -57,6 +57,9 @@ public class Stack {
 	public Object popReference() {
 		return pop().referenceValue();
 	}
+	public void push(final boolean b) {
+		pushSlot(Slot.of(b));
+	}
 	public void push(final double d) {
 		pushSlot(Slot.of(d));
 	}

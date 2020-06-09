@@ -95,6 +95,13 @@ public class StackTest {
 		assertThrows(IndexOutOfBoundsException.class, stack::pop);
 	}
 	@Test
+	void testStackPushBoolean() {
+		stack.push(true);
+		assertEquals(true, stack.pop().booleanValue());
+		stack.push(false);
+		assertEquals(false, stack.pop().booleanValue());
+	}
+	@Test
 	void testStackPushDouble() {
 		stack.push(2.0d);
 		assertEquals(2.0d, stack.pop().doubleValue());
