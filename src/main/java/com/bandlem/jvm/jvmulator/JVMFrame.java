@@ -68,6 +68,14 @@ public class JVMFrame {
 		}
 		throw new IllegalStateException("Read to end of " + descriptor + " without closing )");
 	}
+	static boolean instanceOf(final Object target, final String className) {
+		try {
+			final Class<?> clazz = Class.forName(className.replace('/', '.'));
+			return clazz.isAssignableFrom(target.getClass());
+		} catch (final Exception e) {
+			throw new UnsupportedOperationException("Cannot instanceof " + className + " on " + target, e);
+		}
+	}
 	private final byte[] bytecode;
 	// private final JavaClass javaClass;
 	private final Slot[] locals;
@@ -946,6 +954,17 @@ public class JVMFrame {
 		case Opcodes.LDC2_W:
 			pushConstant((bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));
 			return true;
+		// Instances
+		case Opcodes.INSTANCEOF: {
+			final int index = (bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff);
+			final Object ref = stack.popReference();
+			if (ref == null) {
+				stack.push(false);
+			} else {
+				stack.push(instanceOf(ref, pool.getClassName(index)));
+			}
+			return true;
+		}
 		// Invoke
 		case Opcodes.INVOKESTATIC: {
 			invoke(null, (bytecode[pc++] & 0xff) << 8 | (bytecode[pc++] & 0xff));

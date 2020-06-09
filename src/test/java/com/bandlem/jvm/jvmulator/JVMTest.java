@@ -24,6 +24,7 @@ import com.bandlem.jvm.jvmulator.classfile.ConstantPool;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.DoubleConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.FloatConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.IntConstant;
+import com.bandlem.jvm.jvmulator.classfile.ConstantPool.ClassConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.Item;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.LongConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.MethodRef;
@@ -543,6 +544,31 @@ class JVMTest {
 				ICONST_0, NEWARRAY, 'Z', IFNONNULL, 0x00, 0x07, ICONST_3, GOTO, 0x00, 0x04, ICONST_2, ICONST_0, IADD,
 				IRETURN
 		});
+	}
+	@Test
+	void testInstanceOf() {
+		final byte[] bytes = Base64.getDecoder().decode(constantData);
+		assertEquals(399, bytes.length);
+		final JavaClass javaClass = new JavaClass(new DataInputStream(new ByteArrayInputStream(bytes)));
+		final ConstantPool pool = javaClass.pool;
+		final Item objectClass = pool.getItem(4);
+		assertTrue(objectClass instanceof ClassConstant);
+		assertEquals("java/lang/Object", pool.getClassName(4));
+		final Item systemClass = pool.getItem(26);
+		assertTrue(systemClass instanceof ClassConstant);
+		assertEquals("java/lang/System", pool.getClassName(26));
+		final Item string = pool.getItem(15);
+		assertTrue(string instanceof StringConstant);
+		assertEquals(0, new JVMFrame(javaClass, 0, new byte[] {
+				ACONST_NULL, INSTANCEOF, 0x00, 0x04, IRETURN
+		}).run().intValue());
+		assertEquals(1, new JVMFrame(javaClass, 0, new byte[] {
+				LDC, 0x0f, INSTANCEOF, 0x00, 0x04, IRETURN
+		}).run().intValue());
+		assertEquals(0, new JVMFrame(javaClass, 0, new byte[] {
+				LDC, 0x0f, INSTANCEOF, 0x00, 0x1a, IRETURN
+		}).run().intValue());
+		assertThrows(UnsupportedOperationException.class, () -> JVMFrame.instanceOf("foobar", "foobar"));
 	}
 	@Test
 	void testInteger() {
