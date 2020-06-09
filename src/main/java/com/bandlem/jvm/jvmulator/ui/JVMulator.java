@@ -79,6 +79,15 @@ public class JVMulator extends JPanel {
 		}
 		stack.setText(builder.toString());
 	}
+	private String[] getValues(final String methodName, final Class<?>[] types) {
+		final String[] values = new String[types.length];
+		for (int i = 0; i < values.length; i++) {
+			final String answer = JOptionPane.showInputDialog(null,
+					"Argument " + i + " (" + types[i].getSimpleName() + ")", methodName, JOptionPane.QUESTION_MESSAGE);
+			values[i] = answer;
+		}
+		return values;
+	}
 	@Override
 	public void setName(final String name) {
 		final Method method = javaClass.getMethod(name);
@@ -88,9 +97,18 @@ public class JVMulator extends JPanel {
 			final Code codeAttribute = method.getCodeAttribute();
 			code = codeAttribute.getBytecode();
 			frame = new JVMFrame(javaClass, codeAttribute.getMaxLocals(), code);
+			getArguments(name, method);
 			displayCode();
 			displayLocals();
 			displayStack();
+		}
+	}
+	private void getArguments(final String name, final Method method) {
+		final Class<?>[] types = Method.argumentTypes(method.descriptor, frame.getClass().getClassLoader());
+		final String[] values = getValues(name, types);
+		final Slot[] l = frame.getLocals();
+		for (int i = 0; i < l.length; i++) {
+			l[l.length - i - 1] = toSlot(types[i], values[i]);
 		}
 	}
 	public void step() {
@@ -103,6 +121,21 @@ public class JVMulator extends JPanel {
 			pc = -1;
 			JOptionPane.showMessageDialog(null, "Return value: " + frame.getReturnValue(), "Returned",
 					JOptionPane.INFORMATION_MESSAGE);
+		}
+	}
+	private Slot toSlot(final Class<?> type, final String value) {
+		if (type == Integer.TYPE || type == Short.TYPE || type == Byte.TYPE || type == Character.TYPE) {
+			return Slot.of(Integer.parseInt(value));
+		} else if (type == Boolean.TYPE) {
+			return Slot.of(Boolean.parseBoolean(value));
+		} else if (type == Long.TYPE) {
+			return Slot.of(Long.parseLong(value));
+		} else if (type == Float.TYPE) {
+			return Slot.of(Float.parseFloat(value));
+		} else if (type == Double.TYPE) {
+			return Slot.of(Double.parseDouble(value));
+		} else {
+			return Slot.of(value);
 		}
 	}
 }

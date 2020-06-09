@@ -10,6 +10,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 public class GUI extends JPanel {
@@ -89,7 +90,39 @@ public class GUI extends JPanel {
 	public String getSource() {
 		return source.getText();
 	}
+	private Object[] getValues(final String methodName, final Class<?>[] types) {
+		final Object[] values = new Object[types.length];
+		for (int i = 0; i < values.length; i++) {
+			final String answer = JOptionPane.showInputDialog(null,
+					"Argument " + i + " (" + types[i].getSimpleName() + ")", methodName, JOptionPane.QUESTION_MESSAGE);
+			values[i] = toObject(types[i], answer);
+		}
+		return values;
+	}
+	public Object[] promptForArguments() {
+		final Method method = getSelectedMethod();
+		final Class<?>[] types = method.getParameterTypes();
+		return getValues(method.getName(), types);
+	}
 	public void setClassBytes(final byte[] bytes) {
 		this.classBytes = bytes;
+	}
+	private Object toObject(final Class<?> type, final String value) {
+		if (type == Integer.TYPE || type == Integer.class //
+				|| type == Short.TYPE || type == Short.class //
+				|| type == Byte.TYPE || type == Byte.class //
+				|| type == Character.TYPE || type == Character.class) {
+			return Integer.valueOf(value);
+		} else if (type == Boolean.TYPE || type == Boolean.class) {
+			return Boolean.valueOf(value);
+		} else if (type == Long.TYPE || type == Long.class) {
+			return Long.valueOf(value);
+		} else if (type == Float.TYPE || type == Float.class) {
+			return Float.valueOf(value);
+		} else if (type == Double.TYPE || type == Double.class) {
+			return Double.valueOf(value);
+		} else {
+			return value;
+		}
 	}
 }

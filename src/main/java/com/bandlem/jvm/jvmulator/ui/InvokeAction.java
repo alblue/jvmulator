@@ -16,7 +16,8 @@ class InvokeAction extends AbstractAction {
 		try {
 			gui.clearConsole();
 			final Method method = gui.getSelectedMethod();
-			final Object result = method.invoke(null);
+			final Object[] arguments = gui.promptForArguments();
+			final Object result = method.invoke(null, arguments);
 			if (result != null)
 				JOptionPane.showMessageDialog(gui, result.toString(), "Result", JOptionPane.INFORMATION_MESSAGE);
 		} catch (final Exception e) {
