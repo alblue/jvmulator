@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 public class SlotTest {
+	private static final Slot booleanFalseSlot = Slot.of(false);
+	private static final Slot booleanTrueSlot = Slot.of(true);
 	private static final Slot doubleSlot = Slot.of(4.0d);
 	private static final Slot empty = Slot.empty();
 	private static final Slot floatSlot = Slot.of(2.0f);
@@ -21,6 +23,30 @@ public class SlotTest {
 	private static final Slot longSlot = Slot.of(3L);
 	static void wrapSlotInSlot() {
 		Slot.of(Slot.of("Hello World"));
+	}
+	@Test
+	void testBooleanFalseSlot() {
+		final Slot slot = booleanFalseSlot;
+		assertEquals(0, slot.intValue());
+		assertEquals(false, slot.booleanValue());
+		assertEquals(0, slot.toObject());
+		assertEquals("0", slot.toString());
+		assertFalse(slot.isWide());
+		assertThrows(ClassCastException.class, slot::longValue);
+		assertThrows(ClassCastException.class, slot::floatValue);
+		assertThrows(ClassCastException.class, slot::doubleValue);
+	}
+	@Test
+	void testBooleanTrueSlot() {
+		final Slot slot = booleanTrueSlot;
+		assertEquals(1, slot.intValue());
+		assertEquals(true, slot.booleanValue());
+		assertEquals(1, slot.toObject());
+		assertEquals("1", slot.toString());
+		assertFalse(slot.isWide());
+		assertThrows(ClassCastException.class, slot::longValue);
+		assertThrows(ClassCastException.class, slot::floatValue);
+		assertThrows(ClassCastException.class, slot::doubleValue);
 	}
 	@Test
 	void testDoubleSlot() {
@@ -59,6 +85,7 @@ public class SlotTest {
 	void testIntSlot() {
 		final Slot slot = intSlot;
 		assertEquals(1, slot.intValue());
+		assertEquals(true, slot.booleanValue());
 		assertEquals(1, slot.toObject());
 		assertEquals("1", slot.toString());
 		assertFalse(slot.isWide());

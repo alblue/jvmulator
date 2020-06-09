@@ -70,6 +70,9 @@ public abstract class Slot {
 	public static Slot empty() {
 		return EMPTY;
 	}
+	public static Slot of(final boolean b) {
+		return new IntSlot(b ? 1 : 0);
+	}
 	public static Slot of(final double d) {
 		return new DoubleSlot(d);
 	}
@@ -93,6 +96,9 @@ public abstract class Slot {
 	protected Slot(final Object value, final boolean wide) {
 		this.value = value;
 		this.wide = wide;
+	}
+	public boolean booleanValue() {
+		return 0 != (int) ((IntSlot) this).value;
 	}
 	public double doubleValue() {
 		return (double) ((DoubleSlot) this).value;
