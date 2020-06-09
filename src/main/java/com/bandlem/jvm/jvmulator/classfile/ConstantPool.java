@@ -235,4 +235,7 @@ public class ConstantPool {
 	public String getString(final int index) {
 		return getItem(index).stringValue();
 	}
+	public int size() {
+		return items.length;
+	}
 }

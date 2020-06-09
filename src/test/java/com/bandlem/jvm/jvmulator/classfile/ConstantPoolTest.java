@@ -110,6 +110,8 @@ public class ConstantPoolTest {
 		}));
 		assertEquals("alblue", single.getString(1));
 		assertEquals("alblue", single.getClassName(2));
+		assertEquals(1, empty.size());
+		assertEquals(3, single.size());
 	}
 	DataInput with(final byte... data) throws IOException {
 		return new DataInputStream(new ByteArrayInputStream(data));
