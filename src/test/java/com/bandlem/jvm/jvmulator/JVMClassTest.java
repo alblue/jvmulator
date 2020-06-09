@@ -106,7 +106,7 @@ class JVMClassTest {
 	private static byte constant_system;
 	private static JavaClass javaClass;
 	private static ConstantPool pool;
-	static short find(final Object value, final Class type) {
+	static short find(final Object value, final Class<?> type) {
 		for (short i = 1; i < pool.size(); i++) {
 			final Item item = pool.getItem(i);
 			// Double and Long values have a missing slot

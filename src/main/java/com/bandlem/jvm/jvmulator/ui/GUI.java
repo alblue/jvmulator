@@ -4,6 +4,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -51,7 +52,7 @@ public class GUI extends JPanel {
 		System.setOut(out);
 	}
 	public void addMethod(final Method method) {
-		if (method.getDeclaringClass() != Object.class) {
+		if (method.getDeclaringClass() != Object.class && (method.getModifiers() & Modifier.STATIC) != 0) {
 			methods.addItem(method);
 			enableButtons(true);
 		}
