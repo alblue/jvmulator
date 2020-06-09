@@ -290,22 +290,6 @@ class JVMTest {
 		});
 	}
 	@Test
-	void testDescriptor() throws ClassNotFoundException {
-		final Class<?>[] types = JVMFrame.argumentTypes("(ZSCIJFDLjava/lang/String;Z)V", getClass().getClassLoader());
-		assertEquals(9, types.length);
-		assertEquals(Boolean.TYPE, types[0]);
-		assertEquals(Short.TYPE, types[1]);
-		assertEquals(Character.TYPE, types[2]);
-		assertEquals(Integer.TYPE, types[3]);
-		assertEquals(Long.TYPE, types[4]);
-		assertEquals(Float.TYPE, types[5]);
-		assertEquals(Double.TYPE, types[6]);
-		assertEquals(String.class, types[7]);
-		assertEquals(Boolean.TYPE, types[8]);
-		assertThrows(IllegalArgumentException.class, () -> JVMFrame.argumentTypes("(?)V", null));
-		assertThrows(IllegalStateException.class, () -> JVMFrame.argumentTypes("(I", null));
-	}
-	@Test
 	void testDouble() {
 		expect(1.0D, null, 0, new byte[] {
 				DCONST_0, DCONST_1, DADD, DRETURN

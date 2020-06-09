@@ -9,8 +9,6 @@
 package com.bandlem.jvm.jvmulator;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.DoubleConstant;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.FieldRef;
@@ -22,54 +20,8 @@ import com.bandlem.jvm.jvmulator.classfile.ConstantPool.MethodRef;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.NameAndType;
 import com.bandlem.jvm.jvmulator.classfile.ConstantPool.StringConstant;
 import com.bandlem.jvm.jvmulator.classfile.JavaClass;
+import com.bandlem.jvm.jvmulator.classfile.Member;
 public class JVMFrame {
-	static Class<?>[] argumentTypes(final String descriptor, final ClassLoader loader) throws ClassNotFoundException {
-		final byte[] bytes = descriptor.getBytes();
-		final List<Class<?>> types = new ArrayList<>();
-		for (int i = 0; i < bytes.length; i++) {
-			switch (bytes[i]) {
-			case '(':
-				continue;
-			case ')':
-				return types.toArray(new Class[0]);
-			case 'Z':
-				types.add(Boolean.TYPE);
-				break;
-			case 'S':
-				types.add(Short.TYPE);
-				break;
-			case 'C':
-				types.add(Character.TYPE);
-				break;
-			case 'I':
-				types.add(Integer.TYPE);
-				break;
-			case 'J':
-				types.add(Long.TYPE);
-				break;
-			case 'F':
-				types.add(Float.TYPE);
-				break;
-			case 'D':
-				types.add(Double.TYPE);
-				break;
-			case 'L':
-				final int start = i + 1;
-				// Converts java/lang/String to java.lang.String
-				while (bytes[i] != ';') {
-					if (bytes[i] == '/')
-						bytes[i] = '.';
-					i++;
-				}
-				final String clazz = new String(bytes, start, i - start);
-				types.add(loader.loadClass(clazz));
-				break;
-			default:
-				throw new IllegalArgumentException("Unknown type " + (char) bytes[i]);
-			}
-		}
-		throw new IllegalStateException("Read to end of " + descriptor + " without closing )");
-	}
 	static Slot getfield(final Object target, final String fieldName, final String descriptor, final String className,
 			final ClassLoader classLoader) {
 		try {
@@ -191,7 +143,7 @@ public class JVMFrame {
 			final ClassLoader classLoader) {
 		try {
 			final Class<?> clazz = Class.forName(className.replace('/', '.'));
-			final Class<?> types[] = argumentTypes(descriptor, classLoader);
+			final Class<?> types[] = Member.Method.argumentTypes(descriptor, classLoader);
 			final Method method = clazz.getMethod(methodName, types);
 			final Object args[] = new Object[types.length];
 			for (int i = args.length - 1; i >= 0; i--) {
