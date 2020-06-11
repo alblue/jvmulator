@@ -1,5 +1,6 @@
 image:
   file: .devcontainer/Dockerfile
+  context: .devcontainer
 
 tasks:
   - init: mvn -B verify
