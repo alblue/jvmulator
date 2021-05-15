@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import com.formdev.flatlaf.FlatLightLaf;
 public class GUI extends JPanel {
 	private static final long serialVersionUID = 1L;
 	static GridBagConstraints constraints(final int x, final int y) {
@@ -20,6 +21,7 @@ public class GUI extends JPanel {
 				new Insets(0, 0, 0, 0), 0, 0);
 	}
 	public static void main(final String[] args) {
+		FlatLightLaf.install();
 		final JFrame frame = new JFrame("JVMulator");
 		final GUI gui = new GUI();
 		frame.add(gui);
